@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, MapPin, CheckCircle, AlertCircle, Filter } from 'lucide-react';
+import { Search, MapPin, CheckCircle, AlertCircle, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -20,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useEffect, useRef } from 'react';
 
 // Mock data of UBSs and vaccines
 const mockUBSData = [
@@ -110,6 +110,9 @@ const SearchSection = () => {
   const [filterVaccine, setFilterVaccine] = useState('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [searchResults, setSearchResults] = useState(mockUBSData);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const cardWidth = useRef<number>(0);
 
   const handleSearch = () => {
     let results = mockUBSData;
@@ -130,6 +133,46 @@ const SearchSection = () => {
     
     setSearchResults(results);
   };
+
+  const getVisibleCardsCount = () => {
+    if (typeof window === 'undefined' || !carouselRef.current) return 1;
+    
+    const containerWidth = carouselRef.current.clientWidth;
+    // Assuming each card should be ~320px with gap
+    return Math.max(1, Math.floor(containerWidth / 340));
+  };
+
+  const visibleCardsCount = getVisibleCardsCount();
+
+  const nextSlide = () => {
+    setCurrentCardIndex((prevIndex) => 
+      prevIndex + 1 >= searchResults.length ? 0 : prevIndex + 1
+    );
+  };
+
+  const prevSlide = () => {
+    setCurrentCardIndex((prevIndex) => 
+      prevIndex - 1 < 0 ? searchResults.length - 1 : prevIndex - 1
+    );
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (carouselRef.current) {
+        const cardElement = carouselRef.current.querySelector('.carousel-card');
+        if (cardElement) {
+          cardWidth.current = (cardElement as HTMLElement).offsetWidth + 24; // width + gap
+        }
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [searchResults]);
 
   return (
     <section id="search" className="py-24 px-6 bg-gradient-to-b from-white to-teal-50/30">
@@ -221,40 +264,77 @@ const SearchSection = () => {
         </Card>
         
         {viewMode === 'cards' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {searchResults.map((ubs) => (
-              <Card key={ubs.id} className="glass-card border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xl">{ubs.name}</CardTitle>
-                  <p className="text-sm text-gray-500 flex items-center">
-                    <MapPin className="h-3.5 w-3.5 mr-1" />
-                    {ubs.address}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm font-medium mb-3">Vacinas:</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(ubs.vaccines).map(([vaccine, available]) => (
-                      <div 
-                        key={vaccine} 
-                        className={`text-xs rounded-full px-3 py-1.5 flex items-center justify-center font-medium ${
-                          available 
-                            ? 'bg-green-50 text-green-700 border border-green-200' 
-                            : 'bg-gray-50 text-gray-500 border border-gray-200'
-                        }`}
-                      >
-                        {available ? (
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                        ) : (
-                          <AlertCircle className="h-3 w-3 mr-1" />
-                        )}
-                        {vaccine}
+          <div className="relative">
+            {searchResults.length > 0 && (
+              <>
+                <Button
+                  onClick={prevSlide}
+                  className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full p-0 bg-white/80 backdrop-blur-sm shadow-md border border-gray-200 hover:bg-teal-50"
+                  aria-label="Anterior"
+                >
+                  <ChevronLeft className="h-5 w-5 text-gray-700" />
+                </Button>
+                
+                <Button
+                  onClick={nextSlide}
+                  className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full p-0 bg-white/80 backdrop-blur-sm shadow-md border border-gray-200 hover:bg-teal-50"
+                  aria-label="Próximo"
+                >
+                  <ChevronRight className="h-5 w-5 text-gray-700" />
+                </Button>
+              </>
+            )}
+            
+            <div 
+              ref={carouselRef}
+              className="overflow-hidden"
+            >
+              <div 
+                className="flex transition-transform duration-300 ease-in-out gap-6" 
+                style={{ 
+                  transform: `translateX(-${currentCardIndex * 100 / visibleCardsCount}%)`,
+                  width: `${(searchResults.length / visibleCardsCount) * 100}%`
+                }}
+              >
+                {searchResults.map((ubs) => (
+                  <Card 
+                    key={ubs.id} 
+                    className="carousel-card glass-card border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in flex-1 min-w-0"
+                    style={{ width: `calc(${100 / searchResults.length}% - ${(searchResults.length - 1) * 24 / searchResults.length}px)` }}
+                  >
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-xl">{ubs.name}</CardTitle>
+                      <p className="text-sm text-gray-500 flex items-center">
+                        <MapPin className="h-3.5 w-3.5 mr-1" />
+                        {ubs.address}
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm font-medium mb-3">Vacinas:</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {Object.entries(ubs.vaccines).map(([vaccine, available]) => (
+                          <div 
+                            key={vaccine} 
+                            className={`text-xs rounded-full px-3 py-1.5 flex items-center justify-center font-medium ${
+                              available 
+                                ? 'bg-green-50 text-green-700 border border-green-200' 
+                                : 'bg-gray-50 text-gray-500 border border-gray-200'
+                            }`}
+                          >
+                            {available ? (
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                            ) : (
+                              <AlertCircle className="h-3 w-3 mr-1" />
+                            )}
+                            {vaccine}
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
           <Card className="glass-card border-gray-100 overflow-hidden">
