@@ -56,7 +56,7 @@ const Navbar = () => {
             <MapPin className="h-4 w-4 text-white" />
           </div>
           <h1 className="text-xl font-medium">
-            <span className="text-teal-600">Vacina</span>Hub
+            <span className="text-teal-600">Info</span>Vac
           </h1>
         </div>
         

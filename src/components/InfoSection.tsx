@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Accordion,
@@ -166,16 +165,6 @@ const InfoSection = () => {
                       de seus estoques através de um sistema integrado.
                     </AccordionContent>
                   </AccordionItem>
-                  <AccordionItem value="item-5">
-                    <AccordionTrigger className="text-left">
-                      O que fazer se a vacina que preciso não estiver disponível?
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      Você pode verificar em outras UBSs próximas usando nossa função de busca. Também é 
-                      possível entrar em contato diretamente com a UBS para saber quando a vacina estará 
-                      disponível novamente.
-                    </AccordionContent>
-                  </AccordionItem>
                   <AccordionItem value="item-6">
                     <AccordionTrigger className="text-left">
                       Posso tomar mais de uma vacina no mesmo dia?
@@ -264,10 +253,10 @@ const InfoSection = () => {
                   ou pela importância estratégica para a saúde pública.
                 </p>
                 
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-1 gap-6">
                   <Card className="bg-gray-50 border-0">
                     <CardContent className="pt-6">
-                      <h4 className="text-lg font-medium mb-3 text-teal-700">Campanha de Influenza</h4>
+                      <h4 className="text-lg font-medium mb-3 text-teal-700">Campanhas de Vacinação</h4>
                       <ul className="space-y-2 text-gray-700">
                         <li className="flex items-start gap-2">
                           <span className="bg-teal-100 text-teal-800 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">✓</span>
@@ -289,33 +278,13 @@ const InfoSection = () => {
                           <span className="bg-teal-100 text-teal-800 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">✓</span>
                           <span>Pessoas com doenças crônicas</span>
                         </li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="bg-gray-50 border-0">
-                    <CardContent className="pt-6">
-                      <h4 className="text-lg font-medium mb-3 text-teal-700">Campanha de COVID-19</h4>
-                      <ul className="space-y-2 text-gray-700">
-                        <li className="flex items-start gap-2">
-                          <span className="bg-teal-100 text-teal-800 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">✓</span>
-                          <span>Profissionais de saúde</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="bg-teal-100 text-teal-800 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">✓</span>
-                          <span>Idosos acima de 60 anos</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="bg-teal-100 text-teal-800 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">✓</span>
-                          <span>Pessoas com comorbidades</span>
-                        </li>
                         <li className="flex items-start gap-2">
                           <span className="bg-teal-100 text-teal-800 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">✓</span>
                           <span>Pessoas com deficiência permanente</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="bg-teal-100 text-teal-800 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5 text-sm">✓</span>
-                          <span>Gestantes e puérperas</span>
+                          <span>Povos indígenas e comunidades tradicionais</span>
                         </li>
                       </ul>
                     </CardContent>

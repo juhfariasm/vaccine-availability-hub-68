@@ -14,7 +14,7 @@ const Footer = () => {
                 <MapPin className="h-4 w-4 text-white" />
               </div>
               <h1 className="text-xl font-medium">
-                <span className="text-teal-600">Vacina</span>Hub
+                <span className="text-teal-600">Info</span>Vac
               </h1>
             </div>
             <p className="text-gray-600 mb-5 max-w-md">
@@ -80,7 +80,7 @@ const Footer = () => {
         
         <div className="pt-8 border-t border-gray-200 text-center">
           <p className="text-sm text-gray-500">
-            © {currentYear} VacinaHub. Todos os direitos reservados.
+            © {currentYear} InfoVac. Todos os direitos reservados.
           </p>
           <p className="text-xs text-gray-400 mt-2">
             Este site não substitui o atendimento médico profissional. Consulte sempre um profissional de saúde.
