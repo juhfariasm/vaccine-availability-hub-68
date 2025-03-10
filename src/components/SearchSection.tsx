@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Mock data of UBSs and vaccines
 const mockUBSData = [
@@ -111,8 +112,9 @@ const SearchSection = () => {
   const [searchResults, setSearchResults] = useState(mockUBSData);
   const [currentPage, setCurrentPage] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   
-  const CARDS_PER_PAGE = 3;
+  const CARDS_PER_PAGE = isMobile ? 1 : 3;
   const totalPages = Math.ceil(searchResults.length / CARDS_PER_PAGE);
 
   const handleSearch = () => {
@@ -271,14 +273,14 @@ const SearchSection = () => {
                   {totalPages > 0 && Array.from({ length: totalPages }).map((_, pageIndex) => (
                     <div 
                       key={`page-${pageIndex}`} 
-                      className="flex gap-6 min-w-full"
+                      className="flex gap-3 md:gap-6 min-w-full justify-center"
                     >
                       {searchResults
                         .slice(pageIndex * CARDS_PER_PAGE, (pageIndex + 1) * CARDS_PER_PAGE)
                         .map((ubs) => (
                           <Card 
                             key={`ubs-${ubs.id}-${pageIndex}`}
-                            className="carousel-card glass-card border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in flex-1 min-w-0"
+                            className="carousel-card glass-card border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in flex-1 min-w-0 max-w-full md:max-w-[calc(33.333%-1rem)]"
                           >
                             <CardHeader className="pb-2">
                               <CardTitle className="text-xl">{ubs.name}</CardTitle>
