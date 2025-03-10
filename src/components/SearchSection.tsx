@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useRef } from 'react';
 
 // Mock data of UBSs and vaccines
 const mockUBSData = [
@@ -110,14 +109,15 @@ const SearchSection = () => {
   const [filterVaccine, setFilterVaccine] = useState('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [searchResults, setSearchResults] = useState(mockUBSData);
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const cardWidth = useRef<number>(0);
+  
+  const CARDS_PER_PAGE = 3;
+  const totalPages = Math.ceil(searchResults.length / CARDS_PER_PAGE);
 
   const handleSearch = () => {
     let results = mockUBSData;
     
-    // Filter by search query (UBS name or address)
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       results = results.filter(ubs => 
@@ -126,53 +126,28 @@ const SearchSection = () => {
       );
     }
     
-    // Filter by selected vaccine
     if (filterVaccine !== 'all') {
       results = results.filter(ubs => ubs.vaccines[filterVaccine as keyof typeof ubs.vaccines]);
     }
     
     setSearchResults(results);
+    setCurrentPage(0);
   };
-
-  const getVisibleCardsCount = () => {
-    if (typeof window === 'undefined' || !carouselRef.current) return 1;
-    
-    const containerWidth = carouselRef.current.clientWidth;
-    // Assuming each card should be ~320px with gap
-    return Math.max(1, Math.floor(containerWidth / 340));
-  };
-
-  const visibleCardsCount = getVisibleCardsCount();
 
   const nextSlide = () => {
-    setCurrentCardIndex((prevIndex) => 
-      prevIndex + 1 >= searchResults.length ? 0 : prevIndex + 1
-    );
+    setCurrentPage((prevPage) => (prevPage + 1) % totalPages);
   };
 
   const prevSlide = () => {
-    setCurrentCardIndex((prevIndex) => 
-      prevIndex - 1 < 0 ? searchResults.length - 1 : prevIndex - 1
-    );
+    setCurrentPage((prevPage) => (prevPage - 1 + totalPages) % totalPages);
   };
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (carouselRef.current) {
-        const cardElement = carouselRef.current.querySelector('.carousel-card');
-        if (cardElement) {
-          cardWidth.current = (cardElement as HTMLElement).offsetWidth + 24; // width + gap
-        }
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [searchResults]);
+  const getVisibleCards = () => {
+    const repeatedResults = [...searchResults, ...searchResults];
+    
+    const startIndex = currentPage * CARDS_PER_PAGE;
+    return repeatedResults.slice(startIndex, startIndex + CARDS_PER_PAGE);
+  };
 
   return (
     <section id="search" className="py-24 px-6 bg-gradient-to-b from-white to-teal-50/30">
@@ -292,47 +267,58 @@ const SearchSection = () => {
               <div 
                 className="flex transition-transform duration-300 ease-in-out gap-6" 
                 style={{ 
-                  transform: `translateX(-${currentCardIndex * 100 / visibleCardsCount}%)`,
-                  width: `${(searchResults.length / visibleCardsCount) * 100}%`
+                  transform: `translateX(-${currentPage * 100}%)`,
                 }}
               >
-                {searchResults.map((ubs) => (
-                  <Card 
-                    key={ubs.id} 
-                    className="carousel-card glass-card border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in flex-1 min-w-0"
-                    style={{ width: `calc(${100 / searchResults.length}% - ${(searchResults.length - 1) * 24 / searchResults.length}px)` }}
-                  >
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-xl">{ubs.name}</CardTitle>
-                      <p className="text-sm text-gray-500 flex items-center">
-                        <MapPin className="h-3.5 w-3.5 mr-1" />
-                        {ubs.address}
-                      </p>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm font-medium mb-3">Vacinas:</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {Object.entries(ubs.vaccines).map(([vaccine, available]) => (
-                          <div 
-                            key={vaccine} 
-                            className={`text-xs rounded-full px-3 py-1.5 flex items-center justify-center font-medium ${
-                              available 
-                                ? 'bg-green-50 text-green-700 border border-green-200' 
-                                : 'bg-gray-50 text-gray-500 border border-gray-200'
-                            }`}
-                          >
-                            {available ? (
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                            ) : (
-                              <AlertCircle className="h-3 w-3 mr-1" />
-                            )}
-                            {vaccine}
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                {searchResults.length > 0 ? (
+                  getVisibleCards().map((ubs, index) => (
+                    <Card 
+                      key={`${ubs.id}-${index}`}
+                      className="carousel-card glass-card border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in flex-1 min-w-0"
+                      style={{ width: `calc(100% / ${CARDS_PER_PAGE})` }}
+                    >
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-xl">{ubs.name}</CardTitle>
+                        <p className="text-sm text-gray-500 flex items-center">
+                          <MapPin className="h-3.5 w-3.5 mr-1" />
+                          {ubs.address}
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm font-medium mb-3">Vacinas:</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {Object.entries(ubs.vaccines).map(([vaccine, available]) => (
+                            <div 
+                              key={vaccine} 
+                              className={`text-xs rounded-full px-3 py-1.5 flex items-center justify-center font-medium ${
+                                available 
+                                  ? 'bg-green-50 text-green-700 border border-green-200' 
+                                  : 'bg-gray-50 text-gray-500 border border-gray-200'
+                              }`}
+                            >
+                              {available ? (
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                              ) : (
+                                <AlertCircle className="h-3 w-3 mr-1" />
+                              )}
+                              {vaccine}
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="w-full text-center py-12">
+                    <div className="inline-flex items-center justify-center p-4 bg-gray-100 rounded-full mb-4">
+                      <Search className="h-6 w-6 text-gray-400" />
+                    </div>
+                    <h3 className="text-xl font-medium mb-2">Nenhum resultado encontrado</h3>
+                    <p className="text-gray-600">
+                      Tente ajustar seus filtros ou buscar por outro termo.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
