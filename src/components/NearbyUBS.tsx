@@ -159,7 +159,7 @@ const NearbyUBS = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {nearbyUBS.map((ubs, index) => (
-              <Card key={ubs.id} className="glass-card overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in flex flex-col" style={{ animationDelay: `${index * 100}ms` }}>
+              <Card key={ubs.id} className="glass-card overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in flex flex-col h-full" style={{ animationDelay: `${index * 100}ms` }}>
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-xl">{ubs.name}</CardTitle>
@@ -172,14 +172,14 @@ const NearbyUBS = () => {
                     {ubs.distance} km de distância
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="text-sm text-gray-600 flex-grow">
+                <CardContent className="text-sm text-gray-600 flex-grow flex flex-col">
                   <p className="mb-1">{ubs.address}</p>
                   <div className="flex items-center text-gray-500 mb-4">
                     <Clock className="h-3.5 w-3.5 mr-1" />
                     <span>{ubs.openingHours}</span>
                   </div>
                   
-                  <div className="mt-3">
+                  <div className="mt-3 flex flex-col flex-grow">
                     <p className="text-sm font-medium mb-2">Vacinas disponíveis:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {ubs.vaccines.map((vaccine) => (
