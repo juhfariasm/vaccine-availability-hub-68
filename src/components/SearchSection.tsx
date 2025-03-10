@@ -135,20 +135,15 @@ const SearchSection = () => {
   };
 
   const nextSlide = () => {
-    setCurrentPage((prevPage) => (prevPage + 1) % totalPages);
+    if (totalPages > 0) {
+      setCurrentPage((prevPage) => (prevPage + 1) % totalPages);
+    }
   };
 
   const prevSlide = () => {
-    setCurrentPage((prevPage) => (prevPage - 1 + totalPages) % totalPages);
-  };
-
-  const getVisibleCards = () => {
-    // Create a doubled array to simulate infinite loop
-    // This ensures we always have enough cards to display
-    const repeatedResults = [...searchResults, ...searchResults, ...searchResults];
-    
-    const startIndex = currentPage * CARDS_PER_PAGE;
-    return repeatedResults.slice(startIndex, startIndex + CARDS_PER_PAGE);
+    if (totalPages > 0) {
+      setCurrentPage((prevPage) => (prevPage - 1 + totalPages) % totalPages);
+    }
   };
 
   return (
@@ -268,9 +263,9 @@ const SearchSection = () => {
             >
               {searchResults.length > 0 ? (
                 <div 
-                  className="flex transition-transform duration-300 ease-in-out gap-6" 
+                  className="flex transition-transform duration-300 ease-in-out" 
                   style={{ 
-                    transform: `translateX(-${currentPage * 100}%)`,
+                    transform: totalPages > 0 ? `translateX(-${currentPage * 100}%)` : 'translateX(0)',
                   }}
                 >
                   {totalPages > 0 && Array.from({ length: totalPages }).map((_, pageIndex) => (
