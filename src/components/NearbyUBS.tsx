@@ -159,7 +159,7 @@ const NearbyUBS = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {nearbyUBS.map((ubs, index) => (
-              <Card key={ubs.id} className="glass-card overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+              <Card key={ubs.id} className="glass-card overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in flex flex-col" style={{ animationDelay: `${index * 100}ms` }}>
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-xl">{ubs.name}</CardTitle>
@@ -172,7 +172,7 @@ const NearbyUBS = () => {
                     {ubs.distance} km de distância
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="text-sm text-gray-600">
+                <CardContent className="text-sm text-gray-600 flex-grow">
                   <p className="mb-1">{ubs.address}</p>
                   <div className="flex items-center text-gray-500 mb-4">
                     <Clock className="h-3.5 w-3.5 mr-1" />
@@ -202,7 +202,7 @@ const NearbyUBS = () => {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="mt-auto">
                   <Button variant="outline" className="w-full gap-2 bg-white">
                     <Navigation className="h-4 w-4" />
                     Ver no mapa
