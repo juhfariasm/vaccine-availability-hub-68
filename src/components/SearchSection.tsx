@@ -143,7 +143,9 @@ const SearchSection = () => {
   };
 
   const getVisibleCards = () => {
-    const repeatedResults = [...searchResults, ...searchResults];
+    // Create a doubled array to simulate infinite loop
+    // This ensures we always have enough cards to display
+    const repeatedResults = [...searchResults, ...searchResults, ...searchResults];
     
     const startIndex = currentPage * CARDS_PER_PAGE;
     return repeatedResults.slice(startIndex, startIndex + CARDS_PER_PAGE);
@@ -264,62 +266,70 @@ const SearchSection = () => {
               ref={carouselRef}
               className="overflow-hidden"
             >
-              <div 
-                className="flex transition-transform duration-300 ease-in-out gap-6" 
-                style={{ 
-                  transform: `translateX(-${currentPage * 100}%)`,
-                }}
-              >
-                {searchResults.length > 0 ? (
-                  getVisibleCards().map((ubs, index) => (
-                    <Card 
-                      key={`${ubs.id}-${index}`}
-                      className="carousel-card glass-card border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in flex-1 min-w-0"
-                      style={{ width: `calc(100% / ${CARDS_PER_PAGE})` }}
+              {searchResults.length > 0 ? (
+                <div 
+                  className="flex transition-transform duration-300 ease-in-out gap-6" 
+                  style={{ 
+                    transform: `translateX(-${currentPage * 100}%)`,
+                  }}
+                >
+                  {totalPages > 0 && Array.from({ length: totalPages }).map((_, pageIndex) => (
+                    <div 
+                      key={`page-${pageIndex}`} 
+                      className="flex gap-6 min-w-full"
                     >
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-xl">{ubs.name}</CardTitle>
-                        <p className="text-sm text-gray-500 flex items-center">
-                          <MapPin className="h-3.5 w-3.5 mr-1" />
-                          {ubs.address}
-                        </p>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm font-medium mb-3">Vacinas:</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {Object.entries(ubs.vaccines).map(([vaccine, available]) => (
-                            <div 
-                              key={vaccine} 
-                              className={`text-xs rounded-full px-3 py-1.5 flex items-center justify-center font-medium ${
-                                available 
-                                  ? 'bg-green-50 text-green-700 border border-green-200' 
-                                  : 'bg-gray-50 text-gray-500 border border-gray-200'
-                              }`}
-                            >
-                              {available ? (
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                              ) : (
-                                <AlertCircle className="h-3 w-3 mr-1" />
-                              )}
-                              {vaccine}
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                ) : (
-                  <div className="w-full text-center py-12">
-                    <div className="inline-flex items-center justify-center p-4 bg-gray-100 rounded-full mb-4">
-                      <Search className="h-6 w-6 text-gray-400" />
+                      {searchResults
+                        .slice(pageIndex * CARDS_PER_PAGE, (pageIndex + 1) * CARDS_PER_PAGE)
+                        .map((ubs) => (
+                          <Card 
+                            key={`ubs-${ubs.id}-${pageIndex}`}
+                            className="carousel-card glass-card border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in flex-1 min-w-0"
+                          >
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-xl">{ubs.name}</CardTitle>
+                              <p className="text-sm text-gray-500 flex items-center">
+                                <MapPin className="h-3.5 w-3.5 mr-1" />
+                                {ubs.address}
+                              </p>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm font-medium mb-3">Vacinas:</p>
+                              <div className="grid grid-cols-2 gap-2">
+                                {Object.entries(ubs.vaccines).map(([vaccine, available]) => (
+                                  <div 
+                                    key={vaccine} 
+                                    className={`text-xs rounded-full px-3 py-1.5 flex items-center justify-center font-medium ${
+                                      available 
+                                        ? 'bg-green-50 text-green-700 border border-green-200' 
+                                        : 'bg-gray-50 text-gray-500 border border-gray-200'
+                                    }`}
+                                  >
+                                    {available ? (
+                                      <CheckCircle className="h-3 w-3 mr-1" />
+                                    ) : (
+                                      <AlertCircle className="h-3 w-3 mr-1" />
+                                    )}
+                                    {vaccine}
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
                     </div>
-                    <h3 className="text-xl font-medium mb-2">Nenhum resultado encontrado</h3>
-                    <p className="text-gray-600">
-                      Tente ajustar seus filtros ou buscar por outro termo.
-                    </p>
+                  ))}
+                </div>
+              ) : (
+                <div className="w-full text-center py-12">
+                  <div className="inline-flex items-center justify-center p-4 bg-gray-100 rounded-full mb-4">
+                    <Search className="h-6 w-6 text-gray-400" />
                   </div>
-                )}
-              </div>
+                  <h3 className="text-xl font-medium mb-2">Nenhum resultado encontrado</h3>
+                  <p className="text-gray-600">
+                    Tente ajustar seus filtros ou buscar por outro termo.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         ) : (
