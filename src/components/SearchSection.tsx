@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, MapPin, CheckCircle, AlertCircle, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Search, MapPin, CheckCircle, AlertCircle, Filter, ChevronLeft, ChevronRight, Navigation, Clock } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -21,12 +21,14 @@ import {
 } from "@/components/ui/select";
 import { useIsMobile } from '@/hooks/use-mobile';
 
-// Mock data of UBSs and vaccines
 const mockUBSData = [
   {
     id: 1,
     name: 'UBS Vila Nova',
     address: 'Rua das Flores, 123',
+    distance: 1.2,
+    status: 'open',
+    openingHours: '07:00 - 19:00',
     vaccines: {
       "COVID-19": true,
       "Gripe": true,
@@ -40,6 +42,9 @@ const mockUBSData = [
     id: 2,
     name: 'UBS Central',
     address: 'Av. Principal, 500',
+    distance: 1.8,
+    status: 'open',
+    openingHours: '08:00 - 18:00',
     vaccines: {
       "COVID-19": true,
       "Gripe": false,
@@ -53,6 +58,9 @@ const mockUBSData = [
     id: 3,
     name: 'UBS Jardim América',
     address: 'Rua dos Ipês, 78',
+    distance: 2.5,
+    status: 'open',
+    openingHours: '07:00 - 17:00',
     vaccines: {
       "COVID-19": false,
       "Gripe": true,
@@ -66,6 +74,9 @@ const mockUBSData = [
     id: 4,
     name: 'UBS Parque das Árvores',
     address: 'Alameda dos Cedros, 45',
+    distance: 3.1,
+    status: 'open',
+    openingHours: '08:00 - 20:00',
     vaccines: {
       "COVID-19": true,
       "Gripe": true,
@@ -79,6 +90,9 @@ const mockUBSData = [
     id: 5,
     name: 'UBS São João',
     address: 'Rua dos Pinheiros, 89',
+    distance: 3.5,
+    status: 'open',
+    openingHours: '07:00 - 17:00',
     vaccines: {
       "COVID-19": true,
       "Gripe": false,
@@ -92,6 +106,9 @@ const mockUBSData = [
     id: 6,
     name: 'UBS Boa Vista',
     address: 'Av. das Palmeiras, 321',
+    distance: 4.2,
+    status: 'closed',
+    openingHours: '08:00 - 18:00',
     vaccines: {
       "COVID-19": false,
       "Gripe": true,
@@ -283,11 +300,26 @@ const SearchSection = () => {
                             className="carousel-card glass-card border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in flex-1 min-w-0 max-w-full md:max-w-[calc(33.333%-1rem)]"
                           >
                             <CardHeader className="pb-2">
-                              <CardTitle className="text-xl">{ubs.name}</CardTitle>
-                              <p className="text-sm text-gray-500 flex items-center">
-                                <MapPin className="h-3.5 w-3.5 mr-1" />
-                                {ubs.address}
-                              </p>
+                              <div className="flex justify-between items-start">
+                                <CardTitle className="text-xl">{ubs.name}</CardTitle>
+                                <Badge variant="outline" className={`${ubs.status === 'open' ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                                  {ubs.status === 'open' ? 'Aberto' : 'Fechado'}
+                                </Badge>
+                              </div>
+                              <div className="flex flex-col text-sm text-gray-500">
+                                <div className="flex items-center">
+                                  <MapPin className="h-3.5 w-3.5 mr-1" />
+                                  <span>{ubs.address}</span>
+                                </div>
+                                <div className="flex items-center mt-1">
+                                  <MapPin className="h-3.5 w-3.5 mr-1" />
+                                  <span>{ubs.distance} km de distância</span>
+                                </div>
+                                <div className="flex items-center mt-1">
+                                  <Clock className="h-3.5 w-3.5 mr-1" />
+                                  <span>{ubs.openingHours}</span>
+                                </div>
+                              </div>
                             </CardHeader>
                             <CardContent>
                               <p className="text-sm font-medium mb-3">Vacinas:</p>
@@ -311,6 +343,12 @@ const SearchSection = () => {
                                 ))}
                               </div>
                             </CardContent>
+                            <CardFooter>
+                              <Button variant="outline" className="w-full gap-2 bg-white">
+                                <Navigation className="h-4 w-4" />
+                                Ver no mapa
+                              </Button>
+                            </CardFooter>
                           </Card>
                         ))}
                     </div>
