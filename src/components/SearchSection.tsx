@@ -1,9 +1,10 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Search, MapPin, CheckCircle, AlertCircle, Filter, ChevronLeft, ChevronRight, Navigation, Clock } from 'lucide-react';
+import { Search, MapPin, CheckCircle, AlertCircle, Filter, ChevronLeft, ChevronRight, Navigation, Clock, BuildingCommunity } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -122,9 +123,12 @@ const mockUBSData = [
 
 const vaccinesList = ["COVID-19", "Gripe", "Febre Amarela", "Tétano", "Hepatite B", "Sarampo"];
 
+const citiesList = ["Teresina", "Timon", "Demerval Lobão"];
+
 const SearchSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVaccine, setFilterVaccine] = useState('all');
+  const [filterCity, setFilterCity] = useState('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [searchResults, setSearchResults] = useState(mockUBSData);
   const [currentPage, setCurrentPage] = useState(0);
@@ -183,39 +187,59 @@ const SearchSection = () => {
             <CardTitle className="text-xl">Filtrar vacinas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-[1fr,auto,auto] gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                <Input
-                  placeholder="Buscar por UBS ou endereço"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-white border-gray-200"
-                />
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Selecione uma cidade</p>
+                <Select value={filterCity} onValueChange={setFilterCity}>
+                  <SelectTrigger className="bg-white border-gray-200 w-full">
+                    <div className="flex items-center gap-2">
+                      <BuildingCommunity className="h-4 w-4" />
+                      <SelectValue placeholder="Todas as cidades" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as cidades</SelectItem>
+                    {citiesList.map(city => (
+                      <SelectItem key={city} value={city}>{city}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
-              <Select value={filterVaccine} onValueChange={setFilterVaccine}>
-                <SelectTrigger className="bg-white border-gray-200 w-full md:w-48">
-                  <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4" />
-                    <SelectValue placeholder="Filtrar por vacina" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas as vacinas</SelectItem>
-                  {vaccinesList.map(vaccine => (
-                    <SelectItem key={vaccine} value={vaccine}>{vaccine}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <Button 
-                onClick={handleSearch}
-                className="bg-teal-600 hover:bg-teal-700 text-white"
-              >
-                <Search className="mr-2 h-4 w-4" />
-                Buscar
-              </Button>
+              <div className="grid grid-cols-1 md:grid-cols-[1fr,auto,auto] gap-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                  <Input
+                    placeholder="Buscar por UBS ou endereço"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 bg-white border-gray-200"
+                  />
+                </div>
+                
+                <Select value={filterVaccine} onValueChange={setFilterVaccine}>
+                  <SelectTrigger className="bg-white border-gray-200 w-full md:w-48">
+                    <div className="flex items-center gap-2">
+                      <Filter className="h-4 w-4" />
+                      <SelectValue placeholder="Filtrar por vacina" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as vacinas</SelectItem>
+                    {vaccinesList.map(vaccine => (
+                      <SelectItem key={vaccine} value={vaccine}>{vaccine}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Button 
+                  onClick={handleSearch}
+                  className="bg-teal-600 hover:bg-teal-700 text-white"
+                >
+                  <Search className="mr-2 h-4 w-4" />
+                  Buscar
+                </Button>
+              </div>
             </div>
             
             <div className="flex justify-between items-center mt-6">
