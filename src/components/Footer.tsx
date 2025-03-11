@@ -1,4 +1,3 @@
-
 import { MapPin, Mail, Phone, Instagram, Facebook, Twitter } from 'lucide-react';
 
 const Footer = () => {
@@ -21,17 +20,6 @@ const Footer = () => {
               Nosso objetivo é facilitar o acesso à informação sobre disponibilidade de vacinas
               nas UBSs, contribuindo para o aumento da cobertura vacinal e proteção da saúde coletiva.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="p-2 rounded-full bg-gray-100 text-gray-700 hover:bg-teal-100 hover:text-teal-600 transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a href="#" className="p-2 rounded-full bg-gray-100 text-gray-700 hover:bg-teal-100 hover:text-teal-600 transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="p-2 rounded-full bg-gray-100 text-gray-700 hover:bg-teal-100 hover:text-teal-600 transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-            </div>
           </div>
           
           <div>
@@ -46,12 +34,6 @@ const Footer = () => {
               <li>
                 <a href="#info" className="text-gray-600 hover:text-teal-600 transition-colors">Mais informações</a>
               </li>
-              <li>
-                <a href="#" className="text-gray-600 hover:text-teal-600 transition-colors">Sobre nós</a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-600 hover:text-teal-600 transition-colors">Política de privacidade</a>
-              </li>
             </ul>
           </div>
           
@@ -64,14 +46,14 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2 text-gray-600">
                 <Mail className="h-4 w-4 text-teal-600" />
-                <a href="mailto:contato@vacinahub.com" className="hover:text-teal-600 transition-colors">
-                  contato@vacinahub.com
+                <a href="mailto:infovac@somosicev.com" className="hover:text-teal-600 transition-colors">
+                  infovac@somosicev.com
                 </a>
               </li>
               <li className="flex items-center gap-2 text-gray-600">
                 <Phone className="h-4 w-4 text-teal-600" />
-                <a href="tel:+551199999999" className="hover:text-teal-600 transition-colors">
-                  (11) 9999-9999
+                <a href="tel:+558640028922" className="hover:text-teal-600 transition-colors">
+                  (86) 4002-8922
                 </a>
               </li>
             </ul>
