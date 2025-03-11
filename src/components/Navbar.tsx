@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Search, MapPin, Info } from 'lucide-react';
-import { ThemeToggle } from '@/components/ThemeToggle';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -48,7 +47,7 @@ const Navbar = () => {
     <header 
       className={cn(
         "fixed top-0 left-0 right-0 z-50 py-4 px-6 transition-all duration-300 ease-out",
-        scrolled ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm" : "bg-transparent"
+        scrolled ? "bg-white/80 backdrop-blur-md shadow-sm" : "bg-transparent"
       )}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -57,7 +56,7 @@ const Navbar = () => {
             <MapPin className="h-4 w-4 text-white" />
           </div>
           <h1 className="text-xl font-medium">
-            <span className="text-teal-600 dark:text-teal-400">Info</span>Vac
+            <span className="text-teal-600">Info</span>Vac
           </h1>
         </div>
         
@@ -66,7 +65,7 @@ const Navbar = () => {
             variant="ghost"
             className={cn(
               "transition-all duration-300",
-              activeSection === 'home' && "text-teal-600 dark:text-teal-400"
+              activeSection === 'home' && "text-teal-600"
             )}
             onClick={() => scrollToSection('home')}
           >
@@ -77,7 +76,7 @@ const Navbar = () => {
             variant="ghost"
             className={cn(
               "transition-all duration-300",
-              activeSection === 'search' && "text-teal-600 dark:text-teal-400"
+              activeSection === 'search' && "text-teal-600"
             )}
             onClick={() => scrollToSection('search')}
           >
@@ -88,7 +87,7 @@ const Navbar = () => {
             variant="ghost"
             className={cn(
               "transition-all duration-300",
-              activeSection === 'info' && "text-teal-600 dark:text-teal-400"
+              activeSection === 'info' && "text-teal-600"
             )}
             onClick={() => scrollToSection('info')}
           >
@@ -98,8 +97,6 @@ const Navbar = () => {
         </nav>
         
         <div className="flex items-center gap-2">
-          <ThemeToggle />
-          
           <div className="md:hidden">
             <Button variant="outline" size="icon" className="rounded-full">
               <span className="sr-only">Menu</span>
