@@ -44,6 +44,45 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
+  .dark {
+    --background: 180 15% 10%;
+    --foreground: 180 7% 95%;
+
+    --card: 180 15% 12%;
+    --card-foreground: 180 7% 95%;
+
+    --popover: 180 15% 15%;
+    --popover-foreground: 180 7% 95%;
+
+    --primary: 175 84% 32%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 180 10% 15%;
+    --secondary-foreground: 180 7% 90%;
+
+    --muted: 180 15% 15%;
+    --muted-foreground: 180 7% 60%;
+
+    --accent: 175 84% 15%;
+    --accent-foreground: 175 84% 90%;
+
+    --destructive: 0 84.2% 40.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 180 10% 20%;
+    --input: 180 10% 20%;
+    --ring: 175 84% 32%;
+
+    --sidebar-background: 180 15% 12%;
+    --sidebar-foreground: 180 7% 70%;
+    --sidebar-primary: 180 7% 95%;
+    --sidebar-primary-foreground: 180 15% 10%;
+    --sidebar-accent: 180 15% 18%;
+    --sidebar-accent-foreground: 180 7% 95%;
+    --sidebar-border: 180 10% 25%;
+    --sidebar-ring: 175 84% 32%;
+  }
 }
 
 @layer base {
@@ -70,7 +109,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-white/70 backdrop-blur-sm border border-white/20 shadow-sm rounded-2xl;
+    @apply bg-white/70 dark:bg-black/20 backdrop-blur-sm border border-white/20 dark:border-white/10 shadow-sm rounded-2xl;
   }
   
   .teal-gradient {
