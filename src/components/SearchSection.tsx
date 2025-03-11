@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Search, MapPin, CheckCircle, AlertCircle, Filter, ChevronLeft, ChevronRight, Navigation, Clock, Building2 } from 'lucide-react';
+import { Search, MapPin, CheckCircle, AlertCircle, Filter, ChevronLeft, ChevronRight, Navigation, Clock } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -29,7 +29,6 @@ const mockUBSData = [
     distance: 1.2,
     status: 'open',
     openingHours: '07:00 - 19:00',
-    city: 'Teresina',
     vaccines: {
       "COVID-19": true,
       "Gripe": true,
@@ -46,7 +45,6 @@ const mockUBSData = [
     distance: 1.8,
     status: 'open',
     openingHours: '08:00 - 18:00',
-    city: 'Timon',
     vaccines: {
       "COVID-19": true,
       "Gripe": false,
@@ -63,7 +61,6 @@ const mockUBSData = [
     distance: 2.5,
     status: 'open',
     openingHours: '07:00 - 17:00',
-    city: 'Demerval Lobão',
     vaccines: {
       "COVID-19": false,
       "Gripe": true,
@@ -80,7 +77,6 @@ const mockUBSData = [
     distance: 3.1,
     status: 'open',
     openingHours: '08:00 - 20:00',
-    city: 'Teresina',
     vaccines: {
       "COVID-19": true,
       "Gripe": true,
@@ -97,7 +93,6 @@ const mockUBSData = [
     distance: 3.5,
     status: 'open',
     openingHours: '07:00 - 17:00',
-    city: 'Timon',
     vaccines: {
       "COVID-19": true,
       "Gripe": false,
@@ -114,7 +109,6 @@ const mockUBSData = [
     distance: 4.2,
     status: 'closed',
     openingHours: '08:00 - 18:00',
-    city: 'Demerval Lobão',
     vaccines: {
       "COVID-19": false,
       "Gripe": true,
@@ -127,12 +121,10 @@ const mockUBSData = [
 ];
 
 const vaccinesList = ["COVID-19", "Gripe", "Febre Amarela", "Tétano", "Hepatite B", "Sarampo"];
-const citiesList = ["Teresina", "Timon", "Demerval Lobão"];
 
 const SearchSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVaccine, setFilterVaccine] = useState('all');
-  const [filterCity, setFilterCity] = useState('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [searchResults, setSearchResults] = useState(mockUBSData);
   const [currentPage, setCurrentPage] = useState(0);
@@ -157,10 +149,6 @@ const SearchSection = () => {
       results = results.filter(ubs => ubs.vaccines[filterVaccine as keyof typeof ubs.vaccines]);
     }
     
-    if (filterCity !== 'all') {
-      results = results.filter(ubs => ubs.city === filterCity);
-    }
-    
     setSearchResults(results);
     setCurrentPage(0);
   };
@@ -178,53 +166,36 @@ const SearchSection = () => {
   };
 
   return (
-    <section id="search" className="py-24 px-6 bg-gradient-to-b from-white to-teal-50/30 dark:from-gray-900 dark:to-gray-800/80">
+    <section id="search" className="py-24 px-6 bg-gradient-to-b from-white to-teal-50/30">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <span className="inline-block py-1 px-3 mb-4 rounded-full text-sm font-medium bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300">
+          <span className="inline-block py-1 px-3 mb-4 rounded-full text-sm font-medium bg-teal-100 text-teal-800">
             Pesquisa avançada
           </span>
           <h2 className="text-3xl md:text-4xl font-medium mb-4">Encontre a vacina que você precisa</h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Pesquise por nome da UBS ou selecione o tipo de vacina para ver onde está disponível.
           </p>
         </div>
         
-        <Card className="glass-card bg-white/80 backdrop-blur-lg border-gray-100 shadow-sm mb-10 dark:bg-gray-800/40 dark:border-gray-700">
+        <Card className="glass-card bg-white/80 backdrop-blur-lg border-gray-100 shadow-sm mb-10">
           <CardHeader>
             <CardTitle className="text-xl">Filtrar vacinas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-4 mb-4">
-              <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-                <Select value={filterCity} onValueChange={setFilterCity}>
-                  <SelectTrigger className="bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700 pl-10">
-                    <SelectValue placeholder="Selecione uma cidade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as cidades</SelectItem>
-                    {citiesList.map(city => (
-                      <SelectItem key={city} value={city}>{city}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-[1fr,auto,auto] gap-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
                 <Input
                   placeholder="Buscar por UBS ou endereço"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700"
+                  className="pl-10 bg-white border-gray-200"
                 />
               </div>
               
               <Select value={filterVaccine} onValueChange={setFilterVaccine}>
-                <SelectTrigger className="bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700 w-full md:w-48">
+                <SelectTrigger className="bg-white border-gray-200 w-full md:w-48">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4" />
                     <SelectValue placeholder="Filtrar por vacina" />
@@ -240,7 +211,7 @@ const SearchSection = () => {
               
               <Button 
                 onClick={handleSearch}
-                className="bg-teal-600 hover:bg-teal-700 text-white dark:bg-teal-700 dark:hover:bg-teal-600"
+                className="bg-teal-600 hover:bg-teal-700 text-white"
               >
                 <Search className="mr-2 h-4 w-4" />
                 Buscar
@@ -249,14 +220,14 @@ const SearchSection = () => {
             
             <div className="flex justify-between items-center mt-6">
               <div className="flex items-center gap-3">
-                <Badge variant="outline" className="bg-white dark:bg-gray-800">
+                <Badge variant="outline" className="bg-white">
                   {searchResults.length} resultados
                 </Badge>
                 
-                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                  <CheckCircle className="h-3.5 w-3.5 text-green-500 dark:text-green-400 mr-1" />
+                <div className="flex items-center text-sm text-gray-500">
+                  <CheckCircle className="h-3.5 w-3.5 text-green-500 mr-1" />
                   <span>Disponível</span>
-                  <AlertCircle className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500 ml-3 mr-1" />
+                  <AlertCircle className="h-3.5 w-3.5 text-gray-400 ml-3 mr-1" />
                   <span>Indisponível</span>
                 </div>
               </div>
@@ -265,7 +236,7 @@ const SearchSection = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className={`py-1 px-2 text-xs font-medium ${viewMode === 'cards' ? 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-800' : 'bg-white dark:bg-gray-800'}`}
+                  className={`py-1 px-2 text-xs font-medium ${viewMode === 'cards' ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-white'}`}
                   onClick={() => setViewMode('cards')}
                 >
                   Cartões
@@ -273,7 +244,7 @@ const SearchSection = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className={`py-1 px-2 text-xs font-medium ${viewMode === 'table' ? 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-800' : 'bg-white dark:bg-gray-800'}`}
+                  className={`py-1 px-2 text-xs font-medium ${viewMode === 'table' ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-white'}`}
                   onClick={() => setViewMode('table')}
                 >
                   Tabela
@@ -289,18 +260,18 @@ const SearchSection = () => {
               <>
                 <Button
                   onClick={prevSlide}
-                  className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full p-0 bg-white/80 backdrop-blur-sm shadow-md border border-gray-200 hover:bg-teal-50 dark:bg-gray-800/80 dark:border-gray-700 dark:hover:bg-gray-700"
+                  className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full p-0 bg-white/80 backdrop-blur-sm shadow-md border border-gray-200 hover:bg-teal-50"
                   aria-label="Anterior"
                 >
-                  <ChevronLeft className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  <ChevronLeft className="h-5 w-5 text-gray-700" />
                 </Button>
                 
                 <Button
                   onClick={nextSlide}
-                  className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full p-0 bg-white/80 backdrop-blur-sm shadow-md border border-gray-200 hover:bg-teal-50 dark:bg-gray-800/80 dark:border-gray-700 dark:hover:bg-gray-700"
+                  className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full p-0 bg-white/80 backdrop-blur-sm shadow-md border border-gray-200 hover:bg-teal-50"
                   aria-label="Próximo"
                 >
-                  <ChevronRight className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  <ChevronRight className="h-5 w-5 text-gray-700" />
                 </Button>
               </>
             )}
@@ -326,23 +297,19 @@ const SearchSection = () => {
                         .map((ubs) => (
                           <Card 
                             key={`ubs-${ubs.id}-${pageIndex}`}
-                            className="carousel-card glass-card border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in flex-1 min-w-0 max-w-full md:max-w-[calc(33.333%-1rem)] dark:border-gray-700 dark:hover:shadow-gray-900/30"
+                            className="carousel-card glass-card border-gray-100 transition-all duration-300 hover:shadow-md animate-fade-in flex-1 min-w-0 max-w-full md:max-w-[calc(33.333%-1rem)]"
                           >
                             <CardHeader className="pb-2">
                               <div className="flex justify-between items-start">
                                 <CardTitle className="text-xl">{ubs.name}</CardTitle>
-                                <Badge variant="outline" className={`${ubs.status === 'open' ? 'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-800' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800'}`}>
+                                <Badge variant="outline" className={`${ubs.status === 'open' ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
                                   {ubs.status === 'open' ? 'Aberto' : 'Fechado'}
                                 </Badge>
                               </div>
-                              <div className="flex flex-col text-sm text-gray-500 dark:text-gray-400">
+                              <div className="flex flex-col text-sm text-gray-500">
                                 <div className="flex items-center">
                                   <MapPin className="h-3.5 w-3.5 mr-1" />
                                   <span>{ubs.address}</span>
-                                </div>
-                                <div className="flex items-center mt-1">
-                                  <Building2 className="h-3.5 w-3.5 mr-1" />
-                                  <span>{ubs.city}</span>
                                 </div>
                                 <div className="flex items-center mt-1">
                                   <MapPin className="h-3.5 w-3.5 mr-1" />
@@ -362,8 +329,8 @@ const SearchSection = () => {
                                     key={vaccine} 
                                     className={`text-xs rounded-full px-3 py-1.5 flex items-center justify-center font-medium ${
                                       available 
-                                        ? 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' 
-                                        : 'bg-gray-50 text-gray-500 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700'
+                                        ? 'bg-green-50 text-green-700 border border-green-200' 
+                                        : 'bg-gray-50 text-gray-500 border border-gray-200'
                                     }`}
                                   >
                                     {available ? (
@@ -377,7 +344,7 @@ const SearchSection = () => {
                               </div>
                             </CardContent>
                             <CardFooter>
-                              <Button variant="outline" className="w-full gap-2 bg-white dark:bg-gray-800">
+                              <Button variant="outline" className="w-full gap-2 bg-white">
                                 <Navigation className="h-4 w-4" />
                                 Ver no mapa
                               </Button>
@@ -389,11 +356,11 @@ const SearchSection = () => {
                 </div>
               ) : (
                 <div className="w-full text-center py-12">
-                  <div className="inline-flex items-center justify-center p-4 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-                    <Search className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+                  <div className="inline-flex items-center justify-center p-4 bg-gray-100 rounded-full mb-4">
+                    <Search className="h-6 w-6 text-gray-400" />
                   </div>
                   <h3 className="text-xl font-medium mb-2">Nenhum resultado encontrado</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-gray-600">
                     Tente ajustar seus filtros ou buscar por outro termo.
                   </p>
                 </div>
@@ -401,13 +368,12 @@ const SearchSection = () => {
             </div>
           </div>
         ) : (
-          <Card className="glass-card border-gray-100 dark:border-gray-700 overflow-hidden">
+          <Card className="glass-card border-gray-100 overflow-hidden">
             <Table>
-              <TableHeader className="bg-gray-50/80 dark:bg-gray-800/50">
+              <TableHeader className="bg-gray-50/80">
                 <TableRow>
                   <TableHead className="w-[240px]">UBS</TableHead>
                   <TableHead className="w-[180px]">Endereço</TableHead>
-                  <TableHead className="w-[120px]">Cidade</TableHead>
                   {vaccinesList.map(vaccine => (
                     <TableHead key={vaccine} className="text-center">
                       {vaccine}
@@ -417,16 +383,15 @@ const SearchSection = () => {
               </TableHeader>
               <TableBody>
                 {searchResults.map((ubs) => (
-                  <TableRow key={ubs.id} className="hover:bg-gray-50/80 dark:hover:bg-gray-800/50">
+                  <TableRow key={ubs.id} className="hover:bg-gray-50/80">
                     <TableCell className="font-medium">{ubs.name}</TableCell>
-                    <TableCell className="text-gray-600 dark:text-gray-400">{ubs.address}</TableCell>
-                    <TableCell className="text-gray-600 dark:text-gray-400">{ubs.city}</TableCell>
+                    <TableCell className="text-gray-600">{ubs.address}</TableCell>
                     {vaccinesList.map(vaccine => (
                       <TableCell key={vaccine} className="text-center">
                         {ubs.vaccines[vaccine as keyof typeof ubs.vaccines] ? (
-                          <CheckCircle className="h-5 w-5 text-green-500 dark:text-green-400 mx-auto" />
+                          <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
                         ) : (
-                          <AlertCircle className="h-5 w-5 text-gray-400 dark:text-gray-500 mx-auto" />
+                          <AlertCircle className="h-5 w-5 text-gray-400 mx-auto" />
                         )}
                       </TableCell>
                     ))}
@@ -439,11 +404,11 @@ const SearchSection = () => {
         
         {searchResults.length === 0 && (
           <div className="text-center py-12">
-            <div className="inline-flex items-center justify-center p-4 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
-              <Search className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+            <div className="inline-flex items-center justify-center p-4 bg-gray-100 rounded-full mb-4">
+              <Search className="h-6 w-6 text-gray-400" />
             </div>
             <h3 className="text-xl font-medium mb-2">Nenhum resultado encontrado</h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600">
               Tente ajustar seus filtros ou buscar por outro termo.
             </p>
           </div>
