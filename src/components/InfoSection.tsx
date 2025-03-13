@@ -206,7 +206,7 @@ const InfoSection = () => {
                     <li className="flex items-start gap-2">
                       <span className="bg-teal-100 text-teal-800 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">•</span>
                       <div>
-                        <span className="font-medium">6 meses:</span> Pentavalente, VIP, Influenza
+                        <span className="font-medium">6 meses:</span> Pentavalente, VIP, Covid-19
                       </div>
                     </li>
                     <li className="flex items-start gap-2">
@@ -224,7 +224,7 @@ const InfoSection = () => {
                     <li className="flex items-start gap-2">
                       <span className="bg-teal-100 text-teal-800 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">•</span>
                       <div>
-                        <span className="font-medium">15 meses:</span> DTP, VOP, Hepatite A, Tríplice Viral
+                        <span className="font-medium">15 meses:</span> DTP, VIP, Hepatite A, Tetra Viral
                       </div>
                     </li>
                   </ul>
@@ -233,12 +233,27 @@ const InfoSection = () => {
                 <div>
                   <h4 className="text-lg font-medium mb-3 text-teal-700">Adolescentes (11 a 19 anos)</h4>
                   <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-start gap-2">
+                      <span className="bg-teal-100 text-teal-800 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">•</span>
+                      <div>
+                        <span className="font-medium">A qualquer tempo:</span> Hepatite B, Difteria e Tetáno, Febre Amarela, Tríplice Viral
+                      </div>
+                    </li>
                     <li className="flex items-start gap-2">
                       <span className="bg-teal-100 text-teal-800 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">•</span>
                       <div>
-                        <span className="font-medium">11 a 14 anos:</span> HPV (2 doses), Meningocócica C, dT, Febre Amarela, Hepatite B, Tríplice Viral
+                        <span className="font-medium">11 a 14 anos:</span> HPV (2 doses), Meningocócica ACWY
+                        <div> <br /> </div>
                       </div>
                     </li>
+                    <div className="p-5 border border-yellow-200 bg-yellow-50 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-6 w-6 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div> 
+                      <h4 className="text-lg font-medium mb-1 text-yellow-800">Consulte sempre o Ministério de Saúde (gov.br).</h4>
+                    </div>
+                  </div>
+                </div>
                   </ul>
                 </div>
               </div>
