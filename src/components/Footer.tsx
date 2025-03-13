@@ -1,3 +1,4 @@
+
 import { MapPin, Mail, Phone, Instagram, Facebook, Twitter } from 'lucide-react';
 
 const Footer = () => {
@@ -41,19 +42,9 @@ const Footer = () => {
             <h3 className="text-lg font-medium mb-4">Contato</h3>
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-gray-600">
-                <MapPin className="h-4 w-4 text-teal-600" />
-                <span>Rua Exemplo, 123 - Cidade</span>
-              </li>
-              <li className="flex items-center gap-2 text-gray-600">
                 <Mail className="h-4 w-4 text-teal-600" />
                 <a href="mailto:infovac@somosicev.com" className="hover:text-teal-600 transition-colors">
                   infovac@somosicev.com
-                </a>
-              </li>
-              <li className="flex items-center gap-2 text-gray-600">
-                <Phone className="h-4 w-4 text-teal-600" />
-                <a href="tel:+558640028922" className="hover:text-teal-600 transition-colors">
-                  (86) 4002-8922
                 </a>
               </li>
             </ul>
