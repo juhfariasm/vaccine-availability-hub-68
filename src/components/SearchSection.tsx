@@ -6,16 +6,24 @@ import UBSCardView from './ubs/UBSCardView';
 import UBSTableView from './ubs/UBSTableView';
 import EmptyResults from './ubs/EmptyResults';
 import { mockUBSData } from '@/data/mockUBSData';
+import { UBSItem } from '@/types/ubs';
 
 const SearchSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVaccine, setFilterVaccine] = useState('all');
   const [filterCity, setFilterCity] = useState('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
-  const [searchResults, setSearchResults] = useState(mockUBSData);
+  
+  // Convert mockUBSData status strings to the expected "open" | "closed" type
+  const typedMockUBSData: UBSItem[] = mockUBSData.map(ubs => ({
+    ...ubs,
+    status: ubs.status === "Aberto" ? "open" : "closed"
+  }));
+  
+  const [searchResults, setSearchResults] = useState<UBSItem[]>(typedMockUBSData);
   
   const handleSearch = () => {
-    let results = mockUBSData;
+    let results = typedMockUBSData;
     
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -27,6 +35,10 @@ const SearchSection = () => {
     
     if (filterVaccine !== 'all') {
       results = results.filter(ubs => ubs.vaccines[filterVaccine as keyof typeof ubs.vaccines]);
+    }
+    
+    if (filterCity !== 'all') {
+      results = results.filter(ubs => ubs.address.includes(filterCity));
     }
     
     setSearchResults(results);

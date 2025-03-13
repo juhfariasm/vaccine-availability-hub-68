@@ -13,6 +13,7 @@ import {
 import { vaccinesList, citiesList } from '@/data/mockUBSData';
 import { SearchFiltersProps, ViewToggleProps } from '@/types/ubs';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const SearchFilters = ({ 
   searchQuery, 
@@ -82,8 +83,10 @@ export const SearchFilters = ({
 };
 
 export const ViewToggle = ({ viewMode, setViewMode, resultsCount }: ViewToggleProps) => {
+  const isMobile = useIsMobile();
+
   return (
-    <div className="flex justify-between items-center mt-6">
+    <div className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-between items-center'} mt-6`}>
       <div className="flex items-center gap-3">
         <Badge variant="outline" className="bg-white">
           {resultsCount} resultados
@@ -97,7 +100,7 @@ export const ViewToggle = ({ viewMode, setViewMode, resultsCount }: ViewTogglePr
         </div>
       </div>
       
-      <div className="flex gap-2">
+      <div className="flex gap-2 self-center">
         <Button
           variant="outline"
           size="sm"
