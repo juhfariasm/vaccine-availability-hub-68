@@ -1,8 +1,8 @@
 
-const { Client } = require('pg');
+const { Pool } = require('pg');
 
-// Configurações do PostgreSQL
-const client = new Client({
+// Configurações do PostgreSQL usando Pool em vez de Client
+const pool = new Pool({
   user: 'infovacdb_idtw_user',
   host: 'dpg-cv0fht5umphs73eqfk6g-a.oregon-postgres.render.com',
   database: 'infovacdb_idtw',
@@ -13,11 +13,14 @@ const client = new Client({
   },
 });
 
-// Conecta ao banco de dados
-client
-  .connect()
-  .then(() => console.log('Conectado ao banco de dados PostgreSQL'))
-  .catch((err) => console.error('Erro ao conectar ao banco:', err));
+// Teste de conexão ao inicializar
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('Erro ao conectar ao banco:', err);
+  } else {
+    console.log('Conexão com o PostgreSQL estabelecida com sucesso!');
+  }
+});
 
-// Exporta o client para ser usado em outros arquivos
-module.exports = client;
+// Exporta o pool para ser usado em outros arquivos
+module.exports = pool;

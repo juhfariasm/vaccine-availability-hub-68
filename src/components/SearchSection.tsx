@@ -1,47 +1,60 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SearchFilters, ViewToggle } from './ubs/SearchFilters';
 import UBSCardView from './ubs/UBSCardView';
 import UBSTableView from './ubs/UBSTableView';
 import EmptyResults from './ubs/EmptyResults';
-import { mockUBSData } from '@/data/mockUBSData';
 import { UBSItem } from '@/types/ubs';
+import { searchUBS } from '@/services/ubsService';
+import { useToast } from '@/hooks/use-toast';
 
 const SearchSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVaccine, setFilterVaccine] = useState('all');
   const [filterCity, setFilterCity] = useState('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [searchResults, setSearchResults] = useState<UBSItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
   
-  // Convert mockUBSData status strings to the expected "open" | "closed" type
-  const typedMockUBSData: UBSItem[] = mockUBSData.map(ubs => ({
-    ...ubs,
-    status: ubs.status === "Aberto" ? "open" : "closed"
-  }));
+  useEffect(() => {
+    // Carrega os dados iniciais quando o componente monta
+    const loadInitialData = async () => {
+      try {
+        setLoading(true);
+        const results = await searchUBS('', 'all', 'all');
+        setSearchResults(results);
+      } catch (error) {
+        console.error('Erro ao carregar dados iniciais:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os dados das UBS",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadInitialData();
+  }, [toast]);
   
-  const [searchResults, setSearchResults] = useState<UBSItem[]>(typedMockUBSData);
-  
-  const handleSearch = () => {
-    let results = typedMockUBSData;
-    
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      results = results.filter(ubs => 
-        ubs.name.toLowerCase().includes(query) || 
-        ubs.address.toLowerCase().includes(query)
-      );
+  const handleSearch = async () => {
+    try {
+      setLoading(true);
+      const results = await searchUBS(searchQuery, filterVaccine, filterCity);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Erro ao pesquisar:', error);
+      toast({
+        title: "Erro na pesquisa",
+        description: "Houve um problema ao buscar os dados",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-    
-    if (filterVaccine !== 'all') {
-      results = results.filter(ubs => ubs.vaccines[filterVaccine as keyof typeof ubs.vaccines]);
-    }
-    
-    if (filterCity !== 'all') {
-      results = results.filter(ubs => ubs.address.includes(filterCity));
-    }
-    
-    setSearchResults(results);
   };
 
   return (
@@ -80,13 +93,22 @@ const SearchSection = () => {
           </CardContent>
         </Card>
         
-        {viewMode === 'cards' ? (
-          <UBSCardView searchResults={searchResults} />
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-teal-500 border-r-2 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Carregando...</p>
+          </div>
         ) : (
-          <UBSTableView searchResults={searchResults} />
+          <>
+            {viewMode === 'cards' ? (
+              <UBSCardView searchResults={searchResults} />
+            ) : (
+              <UBSTableView searchResults={searchResults} />
+            )}
+            
+            {searchResults.length === 0 && <EmptyResults />}
+          </>
         )}
-        
-        {searchResults.length === 0 && <EmptyResults />}
       </div>
     </section>
   );
