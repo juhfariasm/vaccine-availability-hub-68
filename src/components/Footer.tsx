@@ -1,5 +1,5 @@
 
-import { MapPin, Mail, Phone, Instagram, Facebook, Twitter } from 'lucide-react';
+import { MapPin, Mail, Phone, Instagram, Facebook, Twitter, UserCog} from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
@@ -49,7 +49,8 @@ const Footer = () => {
                 </a>
               </li>
               <li className="flex items-center gap-2 text-gray-600">
-                <Link to="/colaborador" className="text-teal-600 hover:text-teal-700 font-medium transition-colors">
+                <UserCog className="h-4 w-4 text-teal-600" />
+                <Link to="/colaborador" className="text-gray-600 hover:text-teal-700 transition-colors">
                   Acesse como colaborador
                 </Link>
               </li>
