@@ -1,12 +1,13 @@
 
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
+import { ArrowLeft } from 'lucide-react';
 
 const loginSchema = z.object({
   cpf: z.string().min(11, 'CPF inválido').max(14),
@@ -101,8 +102,14 @@ const ColaboradorPage = () => {
         </div>
         
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Login</CardTitle>
+            <Link to="/">
+              <Button variant="outline" size="sm" className="gap-1">
+                <ArrowLeft className="h-4 w-4" />
+                Voltar ao início
+              </Button>
+            </Link>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
