@@ -5,7 +5,7 @@ import { vaccinesList } from '@/data/mockUBSData';
 // Conditional import for database client
 let client;
 if (typeof window === 'undefined') {
-  import('../database.ts').then(module => {
+  import('../database').then(module => {
     client = module.default;
   }).catch(err => {
     console.error('Error importing client:', err);
@@ -48,18 +48,18 @@ const mapDbRowToUBS = (row: any): UBSItem => {
     }
   }
 
-  // Ensure status is either 'open' or 'closed'
-  let status: 'open' | 'closed' = 'closed';
-  if (row.status === 'Aberto' || row.status === 'open' || row.status === true) {
-    status = 'open';
-  }
+  // Ensure status is either 'open' or 'closed' as a union type
+  const status: 'open' | 'closed' = row.status === 'open' || 
+                                    row.status === 'Aberto' || 
+                                    row.status === true ? 
+                                    'open' : 'closed';
 
   return {
     id: row.id,
     name: row.name || row.nome || '',
     address: row.address || row.endereco || '',
     distance: typeof row.distance === 'number' ? row.distance : 0,
-    status: status,
+    status,
     openingHours: row.opening_hours || row.horario_funcionamento || '08:00 - 18:00',
     vaccines
   };
@@ -77,7 +77,7 @@ export const getAllUBS = async (): Promise<UBSItem[]> => {
     // Try to import client dynamically for server environment
     if (!client) {
       try {
-        const module = await import('../database.ts');
+        const module = await import('../database');
         client = module.default;
       } catch (e) {
         console.error('Failed to load database client:', e);
