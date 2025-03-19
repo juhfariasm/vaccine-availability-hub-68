@@ -3,23 +3,13 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { ChevronRight, Check, X, Home } from 'lucide-react';
+import { ChevronRight, Check, X, Home, Syringe } from 'lucide-react';
 import { vaccinesList } from '@/data/mockUBSData';
 import { Link } from 'react-router-dom';
-
-// Tipos de mensagens para o Typebot
-type MessageType = 'bot' | 'user-action' | 'user-confirmation';
-
-// Tipos de ações que o usuário pode realizar
-type ActionType = 'select-vaccines' | 'set-availability' | 'confirmation';
-
-// Interface para cada mensagem na conversa
-interface Message {
-  id: string;
-  type: MessageType;
-  content: React.ReactNode;
-  action?: ActionType;
-}
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 // Interface para controlar a disponibilidade das vacinas
 interface VaccineAvailability {
@@ -28,14 +18,14 @@ interface VaccineAvailability {
 }
 
 const GerenciarVacinas = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [selectedVaccines, setSelectedVaccines] = useState<string[]>([]);
+  const [showVaccineManager, setShowVaccineManager] = useState(false);
   const [vaccineStatus, setVaccineStatus] = useState<VaccineAvailability[]>([]);
-  const [selectedAvailability, setSelectedAvailability] = useState<boolean | null>(null);
-  const [conversationCompleted, setConversationCompleted] = useState(false);
+  const [selectedVaccines, setSelectedVaccines] = useState<string[]>([]);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [changes, setChanges] = useState<VaccineAvailability[]>([]);
   const { toast } = useToast();
 
-  // Inicializar a conversa e as vacinas disponíveis
+  // Inicializar as vacinas disponíveis
   useEffect(() => {
     // Inicializar a lista de vacinas com status randômico para demonstração
     const initialVaccineStatus = vaccinesList.map(v => ({
@@ -47,316 +37,69 @@ const GerenciarVacinas = () => {
     console.log("Status inicial das vacinas:", initialVaccineStatus);
     
     setVaccineStatus(initialVaccineStatus);
-    
-    // Adicionar as mensagens iniciais de boas-vindas
-    setMessages([
-      {
-        id: '1',
-        type: 'bot',
-        content: 'Olá, colaborador! Bem-vindo ao sistema de gerenciamento de vacinas.',
-      },
-      {
-        id: '2',
-        type: 'bot',
-        content: 'Como posso ajudar você hoje?',
-      },
-      {
-        id: '3',
-        type: 'user-action',
-        content: (
-          <Button 
-            onClick={() => handleStartVaccineSelection()}
-            className="flex items-center"
-          >
-            Alterar disponibilidade de vacinas
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
-        ),
-      },
-    ]);
   }, []);
 
-  // Inicia o processo de seleção de vacinas
-  const handleStartVaccineSelection = () => {
-    setMessages(prev => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        type: 'bot',
-        content: (
-          <div>
-            <p>Quais vacinas você deseja alterar a disponibilidade?</p>
-            <p className="text-xs mt-1">Selecione uma ou mais opções</p>
-          </div>
-        ),
-      },
-      {
-        id: Date.now().toString() + '1',
-        type: 'user-action',
-        action: 'select-vaccines',
-        content: (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {vaccineStatus.map(vaccine => (
-              <Button
-                key={vaccine.name}
-                variant={selectedVaccines.includes(vaccine.name) ? "default" : "outline"}
-                className={`justify-between ${selectedVaccines.includes(vaccine.name) ? "" : "border-gray-300"}`}
-                onClick={() => handleSelectVaccine(vaccine.name)}
-              >
-                <span className="flex items-center">
-                  {vaccine.name}
-                  <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${vaccine.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {vaccine.available ? 'Disponível' : 'Indisponível'}
-                  </span>
-                </span>
-                {selectedVaccines.includes(vaccine.name) && <Check className="h-4 w-4" />}
-              </Button>
-            ))}
-          </div>
-        ),
-      },
-    ]);
+  const handleVaccineSelect = (vaccine: string) => {
+    setSelectedVaccines(prev => 
+      prev.includes(vaccine) 
+        ? prev.filter(v => v !== vaccine) 
+        : [...prev, vaccine]
+    );
   };
 
-  // Adiciona ou remove uma vacina da lista de selecionadas
-  const handleSelectVaccine = (vaccine: string) => {
-    setSelectedVaccines(prev => {
-      const newSelection = prev.includes(vaccine)
-        ? prev.filter(v => v !== vaccine)
-        : [...prev, vaccine];
-      
-      // Atualiza os botões de ação baseado na seleção
-      updateActionButton(newSelection);
-      return newSelection;
-    });
-  };
-
-  // Atualiza os botões de ação baseado na seleção de vacinas
-  const updateActionButton = (vaccines: string[]) => {
-    // Remove qualquer botão de continuar existente
-    setMessages(prev => prev.filter(m => m.action !== 'confirmation' && m.id !== 'continue-button'));
+  const handleStatusChange = (vaccine: string, available: boolean) => {
+    // Encontrar o índice da vacina
+    const vaccineIndex = changes.findIndex(v => v.name === vaccine);
     
-    // Se há vacinas selecionadas, adiciona o botão de continuar
-    if (vaccines.length > 0) {
-      setMessages(prev => [
-        ...prev,
-        {
-          id: 'continue-button',
-          type: 'user-action',
-          content: (
-            <Button 
-              onClick={() => handleShowAvailabilityOptions()}
-              className="self-end flex items-center mt-4"
-            >
-              Continuar
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
-          ),
-        },
-      ]);
+    // Se a vacina já existe nos changes, atualizar seu status
+    if (vaccineIndex !== -1) {
+      const updatedChanges = [...changes];
+      updatedChanges[vaccineIndex].available = available;
+      setChanges(updatedChanges);
+    } else {
+      // Se não, adicionar a nova alteração
+      setChanges(prev => [...prev, { name: vaccine, available }]);
     }
   };
 
-  // Mostra as opções de disponibilidade
-  const handleShowAvailabilityOptions = () => {
-    setMessages(prev => [
-      ...prev.filter(m => m.id !== 'continue-button'), // Remove o botão de continuar
-      {
-        id: Date.now().toString(),
-        type: 'bot',
-        content: (
-          <div>
-            <p>Deseja marcar as vacinas selecionadas como disponíveis ou indisponíveis?</p>
-            <div className="mt-2">
-              <p className="font-medium">Vacinas selecionadas:</p>
-              <ul className="list-disc list-inside">
-                {selectedVaccines.map(vaccine => (
-                  <li key={vaccine}>{vaccine}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        ),
-      },
-      {
-        id: Date.now().toString() + '1',
-        type: 'user-action',
-        action: 'set-availability',
-        content: (
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
-              className="flex-1 bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
-              onClick={() => handleSetAvailability(false)}
-            >
-              <X className="mr-2 h-4 w-4" />
-              Indisponível
-            </Button>
-            <Button 
-              variant="outline"
-              className="flex-1 bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
-              onClick={() => handleSetAvailability(true)}
-            >
-              <Check className="mr-2 h-4 w-4" />
-              Disponível
-            </Button>
-          </div>
-        ),
-      },
-    ]);
-  };
-
-  // Define a disponibilidade das vacinas selecionadas
-  const handleSetAvailability = (available: boolean) => {
-    setSelectedAvailability(available);
-    
-    // Atualiza o status das vacinas selecionadas
+  const saveChanges = () => {
+    // Atualizar o status das vacinas com as mudanças
     const updatedVaccineStatus = [...vaccineStatus];
-    selectedVaccines.forEach(vaccine => {
-      const index = updatedVaccineStatus.findIndex(v => v.name === vaccine);
+    
+    changes.forEach(change => {
+      const index = updatedVaccineStatus.findIndex(v => v.name === change.name);
       if (index !== -1) {
-        updatedVaccineStatus[index] = {
-          ...updatedVaccineStatus[index],
-          available
-        };
+        updatedVaccineStatus[index] = { ...change };
       }
     });
     
     setVaccineStatus(updatedVaccineStatus);
+    setShowConfirmDialog(false);
+    setChanges([]);
     
-    // Adiciona a mensagem de confirmação
-    setMessages(prev => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        type: 'bot',
-        content: (
-          <div>
-            <p>Confirme as alterações:</p>
-            <div className="mt-2">
-              <p className="font-medium">Vacinas:</p>
-              <ul className="list-disc list-inside">
-                {selectedVaccines.map(vaccine => (
-                  <li key={vaccine}>{vaccine}</li>
-                ))}
-              </ul>
-              <p className="mt-2 font-medium">
-                Novo status: 
-                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                  {available ? 'Disponível' : 'Indisponível'}
-                </span>
-              </p>
-            </div>
-          </div>
-        ),
-      },
-      {
-        id: Date.now().toString() + '1',
-        type: 'user-confirmation',
-        content: (
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
-              className="flex-1"
-              onClick={() => handleShowAvailabilityOptions()}
-            >
-              Voltar
-            </Button>
-            <Button 
-              className="flex-1"
-              onClick={handleConfirm}
-            >
-              Confirmar alterações
-            </Button>
-          </div>
-        ),
-      },
-    ]);
-  };
-
-  // Confirma as alterações
-  const handleConfirm = () => {
     toast({
       title: "Alterações salvas com sucesso",
-      description: `${selectedVaccines.length} vacina(s) atualizada(s) com status: ${selectedAvailability ? 'Disponível' : 'Indisponível'}.`,
+      description: `${changes.length} vacina(s) atualizada(s).`,
     });
-    
-    setConversationCompleted(true);
-    
-    // Adiciona a mensagem de confirmação
-    setMessages(prev => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        type: 'bot',
-        content: (
-          <div className="flex items-center">
-            <Check className="h-5 w-5 mr-2 text-green-600" />
-            <p>Alterações realizadas com sucesso!</p>
-          </div>
-        ),
-      },
-      {
-        id: Date.now().toString() + '1',
-        type: 'user-action',
-        content: (
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
-              className="flex-1"
-              onClick={resetChat}
-            >
-              Fazer nova alteração
-            </Button>
-            <Button 
-              className="flex-1"
-              asChild
-            >
-              <Link to="/"><Home className="mr-2 h-4 w-4" />Voltar ao início</Link>
-            </Button>
-          </div>
-        ),
-      },
-    ]);
   };
 
-  // Reinicia a conversa
-  const resetChat = () => {
-    setSelectedVaccines([]);
-    setSelectedAvailability(null);
-    setConversationCompleted(false);
+  const getVaccineCurrentStatus = (vaccine: string) => {
+    // Primeiro verificar se há uma alteração pendente
+    const pendingChange = changes.find(v => v.name === vaccine);
+    if (pendingChange) return pendingChange.available;
     
-    // Reinicia as mensagens
-    setMessages([
-      {
-        id: '1',
-        type: 'bot',
-        content: 'Olá, colaborador! Bem-vindo ao sistema de gerenciamento de vacinas.',
-      },
-      {
-        id: '2',
-        type: 'bot',
-        content: 'Como posso ajudar você hoje?',
-      },
-      {
-        id: '3',
-        type: 'user-action',
-        content: (
-          <Button 
-            onClick={() => handleStartVaccineSelection()}
-            className="flex items-center"
-          >
-            Alterar disponibilidade de vacinas
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
-        ),
-      },
-    ]);
+    // Se não, retornar o status atual
+    const currentStatus = vaccineStatus.find(v => v.name === vaccine);
+    return currentStatus ? currentStatus.available : false;
+  };
+
+  const isVaccineModified = (vaccine: string) => {
+    return changes.some(v => v.name === vaccine);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-50 to-white py-12 px-4 sm:px-6">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">
             <span className="text-teal-600">Info</span>Vac - Gerenciamento
@@ -375,29 +118,142 @@ const GerenciarVacinas = () => {
         
         <Card className="shadow-lg border-gray-200">
           <CardContent className="p-6">
-            <div className="flex flex-col space-y-6">
-              {messages.map((message) => (
-                <div 
-                  key={message.id}
-                  className={`flex ${message.type === 'bot' ? 'justify-start' : 'justify-end'}`}
-                >
-                  {message.type === 'bot' && (
-                    <div className="bg-teal-100 text-teal-800 p-4 rounded-lg">
-                      {message.content}
-                    </div>
-                  )}
-                  
-                  {(message.type === 'user-action' || message.type === 'user-confirmation') && (
-                    <div className={`${message.action ? 'w-full' : ''}`}>
-                      {message.content}
-                    </div>
-                  )}
+            {!showVaccineManager ? (
+              <div className="flex flex-col space-y-6">
+                <div className="bg-teal-100 text-teal-800 p-4 rounded-lg">
+                  <p>Olá, colaborador! Bem-vindo ao sistema de gerenciamento de vacinas.</p>
+                  <p className="mt-2">Como posso ajudar você hoje?</p>
                 </div>
-              ))}
-            </div>
+                
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={() => setShowVaccineManager(true)}
+                    className="flex items-center"
+                  >
+                    <Syringe className="mr-2 h-4 w-4" />
+                    Alterar disponibilidade de vacinas
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="bg-teal-100 text-teal-800 p-4 rounded-lg">
+                  <p>Selecione as vacinas para modificar sua disponibilidade:</p>
+                </div>
+                
+                <ScrollArea className="h-[320px] rounded-md border p-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    {vaccineStatus.map((vaccine) => (
+                      <Card 
+                        key={vaccine.name} 
+                        className={`border ${isVaccineModified(vaccine.name) ? 'border-teal-400' : 'border-gray-200'} hover:border-teal-300 transition-all`}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center">
+                              <Button
+                                variant={selectedVaccines.includes(vaccine.name) ? "default" : "outline"}
+                                size="sm"
+                                className="mr-3"
+                                onClick={() => handleVaccineSelect(vaccine.name)}
+                              >
+                                {selectedVaccines.includes(vaccine.name) ? (
+                                  <Check className="h-4 w-4" />
+                                ) : (
+                                  <Syringe className="h-4 w-4" />
+                                )}
+                              </Button>
+                              <div>
+                                <p className="font-medium">{vaccine.name}</p>
+                                <div className="flex items-center mt-1">
+                                  <span className={`px-2 py-0.5 rounded-full text-xs ${getVaccineCurrentStatus(vaccine.name) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                    {getVaccineCurrentStatus(vaccine.name) ? 'Disponível' : 'Indisponível'}
+                                  </span>
+                                  {isVaccineModified(vaccine.name) && (
+                                    <span className="ml-2 text-xs text-teal-600 font-medium">
+                                      (Alteração pendente)
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {selectedVaccines.includes(vaccine.name) && (
+                              <div className="flex items-center space-x-3">
+                                <span className="text-sm font-medium">
+                                  {getVaccineCurrentStatus(vaccine.name) ? 'Disponível' : 'Indisponível'}
+                                </span>
+                                <Switch
+                                  checked={getVaccineCurrentStatus(vaccine.name)}
+                                  onCheckedChange={(checked) => handleStatusChange(vaccine.name, checked)}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+                
+                <div className="flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowVaccineManager(false);
+                      setSelectedVaccines([]);
+                      setChanges([]);
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                  
+                  <Button
+                    disabled={changes.length === 0}
+                    onClick={() => setShowConfirmDialog(true)}
+                  >
+                    Salvar alterações ({changes.length})
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
+      
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar alterações</DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <p className="mb-4">Confirme as alterações de disponibilidade:</p>
+            <ScrollArea className="h-[200px] rounded-md border p-4">
+              <ul className="space-y-2">
+                {changes.map((change) => (
+                  <li key={change.name} className="flex items-center justify-between">
+                    <span>{change.name}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs ${change.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      {change.available ? 'Disponível' : 'Indisponível'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </ScrollArea>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+              Voltar
+            </Button>
+            <Button onClick={saveChanges}>
+              Confirmar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
