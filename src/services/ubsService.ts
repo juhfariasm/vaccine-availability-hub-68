@@ -71,7 +71,8 @@ export const getAllUBS = async (): Promise<UBSItem[]> => {
     if (typeof window !== 'undefined') {
       console.log('Running in browser, using mock data');
       const { mockUBSData } = await import('@/data/mockUBSData');
-      return mockUBSData;
+      // Ensure mockUBSData is properly typed by mapping it through mapDbRowToUBS
+      return mockUBSData.map(mapDbRowToUBS);
     }
     
     // Try to import client dynamically for server environment
@@ -83,7 +84,7 @@ export const getAllUBS = async (): Promise<UBSItem[]> => {
         console.error('Failed to load database client:', e);
         // Fallback to mock data if client can't be loaded
         const { mockUBSData } = await import('@/data/mockUBSData');
-        return mockUBSData;
+        return mockUBSData.map(mapDbRowToUBS);
       }
     }
     
@@ -103,7 +104,7 @@ export const getAllUBS = async (): Promise<UBSItem[]> => {
     // Use mock data as fallback in case of error
     console.warn('Using mock data as fallback.');
     const { mockUBSData } = await import('@/data/mockUBSData');
-    return mockUBSData;
+    return mockUBSData.map(mapDbRowToUBS);
   }
 };
 
