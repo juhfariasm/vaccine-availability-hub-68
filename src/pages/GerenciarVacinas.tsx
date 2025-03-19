@@ -289,8 +289,8 @@ const GerenciarVacinas = () => {
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="bg-gradient-to-r from-blue-400 to-teal-500 text-white p-4 rounded-lg shadow-md">
-                  <p className="font-medium">Selecione as vacinas para modificar sua disponibilidade:</p>
+                <div className="bg-gradient-to-r from-teal-500 to-teal-600 text-white p-4 rounded-lg shadow-md">
+                <p className="text-white font-medium">Selecione as vacinas para modificar sua disponibilidade:</p>
                   
                   {/* Contador de estatísticas */}
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -796,3 +796,4 @@ const GerenciarVacinas = () => {
 };
 
 export default GerenciarVacinas;
+
