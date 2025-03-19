@@ -1,6 +1,5 @@
 
-import pg from 'pg';
-const { Pool } = pg;
+const { Pool } = require('pg');
 
 // Configurações do PostgreSQL usando Pool em vez de Client
 const pool = new Pool({
@@ -15,4 +14,4 @@ const pool = new Pool({
 });
 
 // Exporta o pool para ser usado em outros arquivos
-export default pool;
+module.exports = pool;

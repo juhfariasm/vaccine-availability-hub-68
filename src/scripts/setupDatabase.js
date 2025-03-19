@@ -1,6 +1,6 @@
 
 // Script para configurar o banco de dados inicial
-import pool from '../db.js';
+const pool = require('../db');
 
 async function setupDatabase() {
   try {
@@ -159,7 +159,7 @@ async function setupDatabase() {
   } catch (err) {
     console.error('Erro durante a configuração do banco de dados:', err);
   } finally {
-    await pool.end();
+    pool.end();
   }
 }
 

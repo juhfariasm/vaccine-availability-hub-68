@@ -1,6 +1,6 @@
 
 // Importa o pool de conexões do PostgreSQL do arquivo db.js
-import pool from './db.js';
+const pool = require('./db');
 
 // Função para testar a conexão com o banco de dados
 async function testConnection() {
@@ -49,7 +49,7 @@ async function testConnection() {
     console.error('Erro na conexão com o banco de dados:', err);
   } finally {
     // Encerra o pool de conexões após os testes
-    await pool.end();
+    pool.end();
   }
 }
 
