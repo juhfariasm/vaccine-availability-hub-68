@@ -1,7 +1,16 @@
-
-import pool from '../db';
 import { UBSItem } from '@/types/ubs';
 import { vaccinesList } from '@/data/mockUBSData';
+
+// Importação condicional do pool
+let pool: any;
+try {
+  // Tenta importar o pool apenas no ambiente Node.js
+  if (typeof window === 'undefined') {
+    pool = require('../db');
+  }
+} catch (error) {
+  console.warn('Erro ao importar o pool de conexão:', error);
+}
 
 // Converter os dados do banco para o formato UBSItem
 const mapDbRowToUBS = (row: any): UBSItem => {
@@ -52,6 +61,13 @@ const mapDbRowToUBS = (row: any): UBSItem => {
 
 export const getAllUBS = async (): Promise<UBSItem[]> => {
   try {
+    // Verifica se estamos no navegador
+    if (typeof window !== 'undefined' || !pool) {
+      console.log('Executando no navegador ou pool não disponível, usando dados mockados');
+      const { mockUBSData } = await import('@/data/mockUBSData');
+      return mockUBSData as UBSItem[];
+    }
+    
     // Tentando obter dados da tabela ubs
     const result = await pool.query('SELECT * FROM ubs');
     

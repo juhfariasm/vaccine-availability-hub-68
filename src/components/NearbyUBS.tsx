@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,29 +23,12 @@ const NearbyUBS = () => {
       setLoading(true);
       setLocationError(false);
       
-      // Simular obtenção de geolocalização
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            // Em um app real, enviaríamos as coordenadas para o servidor
-            console.log('User location:', position.coords.latitude, position.coords.longitude);
-            
-            // Como não estamos enviando coordenadas, apenas buscamos as UBSs mais próximas
-            const nearby = await getNearbyUBS(3);
-            setNearbyUBS(nearby);
-            setLoading(false);
-          },
-          (error) => {
-            console.error('Error getting location:', error);
-            setLocationError(true);
-            loadFallbackData();
-          }
-        );
-      } else {
-        // Navegador não suporta geolocalização
-        setLocationError(true);
-        loadFallbackData();
-      }
+      // Como não precisamos de fato das coordenadas para o mockup,
+      // carregamos diretamente as UBSs mais próximas
+      const nearby = await getNearbyUBS(3);
+      setNearbyUBS(nearby);
+      setLoading(false);
+      
     } catch (error) {
       console.error('Erro ao buscar UBSs próximas:', error);
       toast({

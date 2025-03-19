@@ -13,14 +13,5 @@ const pool = new Pool({
   },
 });
 
-// Teste de conexão ao inicializar
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('Erro ao conectar ao banco:', err);
-  } else {
-    console.log('Conexão com o PostgreSQL estabelecida com sucesso!');
-  }
-});
-
 // Exporta o pool para ser usado em outros arquivos
 module.exports = pool;
