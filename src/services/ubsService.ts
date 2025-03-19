@@ -6,7 +6,9 @@ let pool: any;
 try {
   // Tenta importar o pool apenas no ambiente Node.js
   if (typeof window === 'undefined') {
-    pool = require('../db');
+    // Usando dynamic import para ES modules
+    const poolModule = await import('../db.js');
+    pool = poolModule.default;
   }
 } catch (error) {
   console.warn('Erro ao importar o pool de conexão:', error);
