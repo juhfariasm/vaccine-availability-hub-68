@@ -3,13 +3,13 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { ChevronRight, Check, X, Home, Syringe } from 'lucide-react';
+import { ChevronRight, Check, X, Home, Syringe, Search } from 'lucide-react';
 import { vaccinesList } from '@/data/mockUBSData';
 import { Link } from 'react-router-dom';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
 // Interface para controlar a disponibilidade das vacinas
 interface VaccineAvailability {
@@ -23,6 +23,7 @@ const GerenciarVacinas = () => {
   const [selectedVaccines, setSelectedVaccines] = useState<string[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [changes, setChanges] = useState<VaccineAvailability[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
   // Inicializar as vacinas disponíveis
@@ -97,6 +98,11 @@ const GerenciarVacinas = () => {
     return changes.some(v => v.name === vaccine);
   };
 
+  // Filtrar vacinas com base na pesquisa
+  const filteredVaccines = vaccineStatus.filter(vaccine => 
+    vaccine.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-50 to-white py-12 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
@@ -142,9 +148,31 @@ const GerenciarVacinas = () => {
                   <p>Selecione as vacinas para modificar sua disponibilidade:</p>
                 </div>
                 
+                {/* Barra de pesquisa */}
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Search className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <Input
+                    type="text"
+                    placeholder="Pesquisar vacina por nome..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  {searchQuery && (
+                    <button 
+                      className="absolute inset-y-0 right-0 flex items-center pr-3"
+                      onClick={() => setSearchQuery('')}
+                    >
+                      <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                    </button>
+                  )}
+                </div>
+                
                 <ScrollArea className="h-[320px] rounded-md border p-4">
                   <div className="grid grid-cols-1 gap-4">
-                    {vaccineStatus.map((vaccine) => (
+                    {filteredVaccines.map((vaccine) => (
                       <Card 
                         key={vaccine.name} 
                         className={`border ${isVaccineModified(vaccine.name) ? 'border-teal-400' : 'border-gray-200'} hover:border-teal-300 transition-all`}
@@ -194,6 +222,14 @@ const GerenciarVacinas = () => {
                         </CardContent>
                       </Card>
                     ))}
+                    
+                    {filteredVaccines.length === 0 && (
+                      <div className="flex flex-col items-center justify-center p-8 text-center text-gray-500">
+                        <Search className="h-12 w-12 text-gray-300 mb-2" />
+                        <p className="font-medium">Nenhuma vacina encontrada</p>
+                        <p className="text-sm">Tente outro termo de pesquisa</p>
+                      </div>
+                    )}
                   </div>
                 </ScrollArea>
                 
@@ -204,6 +240,7 @@ const GerenciarVacinas = () => {
                       setShowVaccineManager(false);
                       setSelectedVaccines([]);
                       setChanges([]);
+                      setSearchQuery('');
                     }}
                   >
                     Cancelar
