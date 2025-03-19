@@ -42,6 +42,10 @@ const GerenciarVacinas = () => {
       name: v,
       available: Math.random() > 0.3,
     }));
+    
+    console.log("Vacinas disponíveis:", vaccinesList);
+    console.log("Status inicial das vacinas:", initialVaccineStatus);
+    
     setVaccineStatus(initialVaccineStatus);
     
     // Adicionar as mensagens iniciais de boas-vindas
