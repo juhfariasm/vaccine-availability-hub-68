@@ -1,30 +1,29 @@
 
-import pg from 'pg';
-const { Pool } = pg;
+import { Client } from 'pg';
 
 // PostgreSQL configuration
-const pool = new Pool({
-  user: 'infovacdb_idtw_user',
-  host: 'dpg-cv0fht5umphs73eqfk6g-a.oregon-postgres.render.com',
-  database: 'infovacdb_idtw',
-  password: 'TR33ZGyimpS9UKIF6DtQijfBhD6YfNRN',
+const client = new Client({
+  user: 'seu_usuario',
+  host: 'localhost',
+  database: 'seu_banco',
+  password: 'sua_senha',
   port: 5432,
-  ssl: {
-    rejectUnauthorized: false,
-  },
 });
 
 async function setupDatabase() {
   try {
+    // Connect to the database
+    await client.connect();
+    console.log('✅ Conectado ao PostgreSQL');
     console.log('Starting database setup...');
     
     // Test connection
-    const connTest = await pool.query('SELECT NOW()');
+    const connTest = await client.query('SELECT NOW()');
     console.log('Database connection established!');
     console.log('Database current time:', connTest.rows[0].now);
     
     // Check if ubs table exists
-    const tablesRes = await pool.query(`
+    const tablesRes = await client.query(`
       SELECT * FROM information_schema.tables 
       WHERE table_schema = 'public' AND table_name = 'ubs'
     `);
@@ -33,7 +32,7 @@ async function setupDatabase() {
       console.log('Creating UBS table...');
       
       // Create ubs table
-      await pool.query(`
+      await client.query(`
         CREATE TABLE ubs (
           id SERIAL PRIMARY KEY,
           name VARCHAR(255) NOT NULL,
@@ -51,7 +50,7 @@ async function setupDatabase() {
     }
     
     // Check if there are already records in the table
-    const countRes = await pool.query('SELECT COUNT(*) FROM ubs');
+    const countRes = await client.query('SELECT COUNT(*) FROM ubs');
     
     if (parseInt(countRes.rows[0].count) === 0) {
       console.log('Inserting sample data into UBS table...');
@@ -152,7 +151,7 @@ async function setupDatabase() {
       
       // Insert data into the table
       for (const ubs of sampleData) {
-        await pool.query(
+        await client.query(
           `INSERT INTO ubs (name, address, distance, status, opening_hours, vaccines) 
            VALUES ($1, $2, $3, $4, $5, $6)`,
           [
@@ -176,7 +175,7 @@ async function setupDatabase() {
   } catch (err) {
     console.error('Error during database setup:', err);
   } finally {
-    await pool.end();
+    await client.end();
   }
 }
 

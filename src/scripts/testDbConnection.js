@@ -1,39 +1,39 @@
 
-import pg from 'pg';
-const { Pool } = pg;
+import { Client } from 'pg';
 
 // PostgreSQL configuration
-const pool = new Pool({
-  user: 'infovacdb_idtw_user',
-  host: 'dpg-cv0fht5umphs73eqfk6g-a.oregon-postgres.render.com',
-  database: 'infovacdb_idtw',
-  password: 'TR33ZGyimpS9UKIF6DtQijfBhD6YfNRN',
+const client = new Client({
+  user: 'seu_usuario',
+  host: 'localhost',
+  database: 'seu_banco',
+  password: 'sua_senha',
   port: 5432,
-  ssl: {
-    rejectUnauthorized: false,
-  },
 });
 
 async function testConnection() {
   try {
+    // Connect to the database
+    await client.connect();
+    console.log('✅ Conectado ao PostgreSQL');
+    
     // Execute a simple query to test connection
-    const res = await pool.query('SELECT NOW()');
+    const res = await client.query('SELECT NOW()');
     console.log('Database connection established!');
     console.log('Current database time:', res.rows[0].now);
     
     // Check if ubs table exists
-    const tablesRes = await pool.query(`
+    const tablesRes = await client.query(`
       SELECT * FROM information_schema.tables 
       WHERE table_schema = 'public' AND table_name = 'ubs'
     `);
     
     if (tablesRes.rows.length > 0) {
       console.log('UBS table found! Counting records...');
-      const countRes = await pool.query('SELECT COUNT(*) FROM ubs');
+      const countRes = await client.query('SELECT COUNT(*) FROM ubs');
       console.log(`Total UBS records: ${countRes.rows[0].count}`);
       
       // Example query to show the data
-      const ubsRes = await pool.query('SELECT * FROM ubs LIMIT 2');
+      const ubsRes = await client.query('SELECT * FROM ubs LIMIT 2');
       console.log('Sample UBS data:');
       console.log(ubsRes.rows);
     } else {
@@ -42,9 +42,9 @@ async function testConnection() {
     }
     
   } catch (err) {
-    console.error('Database connection error:', err);
+    console.error('❌ Erro ao conectar com o banco de dados:', err);
   } finally {
-    await pool.end();
+    await client.end();
   }
 }
 

@@ -2,13 +2,13 @@
 import { UBSItem } from '@/types/ubs';
 import { vaccinesList } from '@/data/mockUBSData';
 
-// Conditional import for database pool
-let pool;
+// Conditional import for database client
+let client;
 if (typeof window === 'undefined') {
-  import('../db.js').then(module => {
-    pool = module.default;
+  import('../database.ts').then(module => {
+    client = module.default;
   }).catch(err => {
-    console.error('Error importing pool:', err);
+    console.error('Error importing client:', err);
   });
 }
 
@@ -74,21 +74,21 @@ export const getAllUBS = async (): Promise<UBSItem[]> => {
       return mockUBSData;
     }
     
-    // Try to import pool dynamically for server environment
-    if (!pool) {
+    // Try to import client dynamically for server environment
+    if (!client) {
       try {
-        const module = await import('../db.js');
-        pool = module.default;
+        const module = await import('../database.ts');
+        client = module.default;
       } catch (e) {
-        console.error('Failed to load database pool:', e);
-        // Fallback to mock data if pool can't be loaded
+        console.error('Failed to load database client:', e);
+        // Fallback to mock data if client can't be loaded
         const { mockUBSData } = await import('@/data/mockUBSData');
         return mockUBSData;
       }
     }
     
     // Try to get data from the ubs table
-    const result = await pool.query('SELECT * FROM ubs');
+    const result = await client.query('SELECT * FROM ubs');
     
     // If we have data, map it to UBSItem format
     if (result && result.rows) {
