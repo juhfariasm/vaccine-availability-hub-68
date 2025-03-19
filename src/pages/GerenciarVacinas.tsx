@@ -77,6 +77,8 @@ const GerenciarVacinas = () => {
     setVaccineStatus(updatedVaccineStatus);
     setShowConfirmDialog(false);
     setChanges([]);
+    // Limpar a seleção de vacinas para que nenhuma apareça em modo de edição
+    setSelectedVaccines([]);
     
     toast({
       title: "Alterações salvas com sucesso",
