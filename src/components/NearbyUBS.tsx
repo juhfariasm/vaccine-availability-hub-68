@@ -1,59 +1,93 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Navigation, Clock, CheckCircle, AlertCircle } from 'lucide-react';
-import { getNearbyUBS } from '@/services/ubsService';
-import { UBSItem } from '@/types/ubs';
-import { useToast } from '@/hooks/use-toast';
+
+// Mock data for nearby UBSs - reduced to 3 items
+const mockNearbyUBS = [
+  {
+    id: 1,
+    name: 'UBS Vila Nova',
+    distance: 1.2,
+    address: 'Rua das Flores, 123 - Vila Nova',
+    status: 'open',
+    openingHours: '07:00 - 19:00',
+    vaccines: [
+      { name: 'COVID-19', available: true },
+      { name: 'Gripe', available: true },
+      { name: 'Febre Amarela', available: false },
+      { name: 'Tétano', available: true },
+    ]
+  },
+  {
+    id: 2,
+    name: 'UBS Central',
+    distance: 1.8,
+    address: 'Av. Principal, 500 - Centro',
+    status: 'open',
+    openingHours: '08:00 - 18:00',
+    vaccines: [
+      { name: 'COVID-19', available: true },
+      { name: 'Gripe', available: false },
+      { name: 'Febre Amarela', available: true },
+      { name: 'Tétano', available: true },
+    ]
+  },
+  {
+    id: 3,
+    name: 'UBS Jardim América',
+    distance: 2.5,
+    address: 'Rua dos Ipês, 78 - Jardim América',
+    status: 'open',
+    openingHours: '07:00 - 17:00',
+    vaccines: [
+      { name: 'COVID-19', available: false },
+      { name: 'Gripe', available: true },
+      { name: 'Febre Amarela', available: true },
+      { name: 'Tétano', available: false },
+    ]
+  }
+];
 
 const NearbyUBS = () => {
-  const [nearbyUBS, setNearbyUBS] = useState<UBSItem[]>([]);
+  const [nearbyUBS, setNearbyUBS] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [locationError, setLocationError] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
-    // Carrega as UBSs próximas ao montar o componente
-    fetchNearbyUBS();
+    // Simulating API fetch with a delay
+    const timer = setTimeout(() => {
+      setNearbyUBS(mockNearbyUBS);
+      setLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  const fetchNearbyUBS = async () => {
-    try {
-      setLoading(true);
-      setLocationError(false);
-      
-      // Como não precisamos de fato das coordenadas para o mockup,
-      // carregamos diretamente as UBSs mais próximas
-      const nearby = await getNearbyUBS(3);
-      setNearbyUBS(nearby);
-      setLoading(false);
-      
-    } catch (error) {
-      console.error('Erro ao buscar UBSs próximas:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar as UBSs próximas",
-        variant: "destructive"
-      });
-      loadFallbackData();
-    }
-  };
-
-  const loadFallbackData = async () => {
-    try {
-      // Mesmo sem localização, carregamos algumas UBSs
-      const nearby = await getNearbyUBS(3);
-      setNearbyUBS(nearby);
-    } catch (error) {
-      console.error('Erro ao carregar dados de fallback:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleGetLocation = () => {
-    fetchNearbyUBS();
+    setLoading(true);
+    setLocationError(false);
+    
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        () => {
+          // In a real app, we would use position to get nearby UBSs
+          setTimeout(() => {
+            setNearbyUBS(mockNearbyUBS);
+            setLoading(false);
+          }, 1000);
+        },
+        () => {
+          setLocationError(true);
+          setLoading(false);
+        }
+      );
+    } else {
+      setLocationError(true);
+      setLoading(false);
+    }
   };
 
   return (
@@ -115,7 +149,7 @@ const NearbyUBS = () => {
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-xl">{ubs.name}</CardTitle>
-                    <Badge variant="outline" className={`${ubs.status === 'open' ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                    <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
                       {ubs.status === 'open' ? 'Aberto' : 'Fechado'}
                     </Badge>
                   </div>
@@ -125,7 +159,7 @@ const NearbyUBS = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="text-sm text-gray-600 flex-1 flex flex-col">
-                  <div className="mb-3 h-12">
+                  <div className="mb-3 h-12"> {/* Fixed height container for address */}
                     <p className="mb-1">{ubs.address}</p>
                     <div className="flex items-center text-gray-500">
                       <Clock className="h-3.5 w-3.5 mr-1" />
@@ -136,21 +170,21 @@ const NearbyUBS = () => {
                   <div className="flex-1 flex flex-col">
                     <p className="text-sm font-medium mb-2">Vacinas disponíveis:</p>
                     <div className="grid grid-cols-2 gap-2">
-                      {Object.entries(ubs.vaccines).map(([name, available]) => (
+                      {ubs.vaccines.map((vaccine) => (
                         <div 
-                          key={name} 
+                          key={vaccine.name} 
                           className={`text-xs rounded-full px-3 py-1.5 flex items-center justify-center font-medium ${
-                            available 
+                            vaccine.available 
                               ? 'bg-green-50 text-green-700 border border-green-200' 
                               : 'bg-gray-50 text-gray-500 border border-gray-200'
                           }`}
                         >
-                          {available ? (
+                          {vaccine.available ? (
                             <CheckCircle className="h-3 w-3 mr-1" />
                           ) : (
                             <AlertCircle className="h-3 w-3 mr-1" />
                           )}
-                          {name}
+                          {vaccine.name}
                         </div>
                       ))}
                     </div>
