@@ -56,7 +56,7 @@ async function setupDatabase() {
     if (parseInt(countRes.rows[0].count) === 0) {
       console.log('Inserting sample data into UBS table...');
       
-      // Sample data for insertion
+      // Sample data for insertion - ensuring status is 'open' or 'closed'
       const sampleData = [
         {
           name: 'UBS Vila Nova',

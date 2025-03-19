@@ -1,3 +1,4 @@
+
 import { UBSItem } from '@/types/ubs';
 import { vaccinesList } from '@/data/mockUBSData';
 
@@ -47,12 +48,18 @@ const mapDbRowToUBS = (row: any): UBSItem => {
     }
   }
 
+  // Ensure status is either 'open' or 'closed'
+  let status: 'open' | 'closed' = 'closed';
+  if (row.status === 'Aberto' || row.status === 'open' || row.status === true) {
+    status = 'open';
+  }
+
   return {
     id: row.id,
     name: row.name || row.nome || '',
     address: row.address || row.endereco || '',
     distance: typeof row.distance === 'number' ? row.distance : 0,
-    status: row.status === 'Aberto' || row.status === 'open' ? 'open' : 'closed',
+    status: status,
     openingHours: row.opening_hours || row.horario_funcionamento || '08:00 - 18:00',
     vaccines
   };
