@@ -1,5 +1,6 @@
 
 import { MapPin, Mail, Phone, Instagram, Facebook, Twitter } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -46,6 +47,11 @@ const Footer = () => {
                 <a href="mailto:infovac@somosicev.com" className="hover:text-teal-600 transition-colors">
                   infovac@somosicev.com
                 </a>
+              </li>
+              <li className="flex items-center gap-2 text-gray-600">
+                <Link to="/colaborador" className="text-teal-600 hover:text-teal-700 font-medium transition-colors">
+                  Acesse como colaborador
+                </Link>
               </li>
             </ul>
           </div>
