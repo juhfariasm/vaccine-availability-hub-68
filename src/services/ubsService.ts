@@ -1,33 +1,32 @@
 import { UBSItem } from '@/types/ubs';
 import { vaccinesList } from '@/data/mockUBSData';
 
-// Importação condicional do pool
-let pool: any;
-try {
-  // Tenta importar o pool apenas no ambiente Node.js
-  if (typeof window === 'undefined') {
-    pool = require('../db');
-  }
-} catch (error) {
-  console.warn('Erro ao importar o pool de conexão:', error);
+// Conditional import for database pool
+let pool;
+if (typeof window === 'undefined') {
+  import('../db.js').then(module => {
+    pool = module.default;
+  }).catch(err => {
+    console.error('Error importing pool:', err);
+  });
 }
 
-// Converter os dados do banco para o formato UBSItem
+// Convert database row to UBSItem format
 const mapDbRowToUBS = (row: any): UBSItem => {
-  // Cria um objeto com todas as vacinas definidas como false por padrão
+  // Create an object with all vaccines set to false by default
   const vaccines: Record<string, boolean> = {};
   vaccinesList.forEach(vaccine => {
     vaccines[vaccine] = false;
   });
 
-  // Se o row tiver uma coluna vaccines, atualiza o objeto vaccines
+  // If the row has a vaccines column, update the vaccines object
   if (row.vaccines) {
     try {
-      const vaccinesFromDb = Array.isArray(row.vaccines) 
-        ? row.vaccines 
-        : JSON.parse(row.vaccines);
+      const vaccinesFromDb = typeof row.vaccines === 'string' 
+        ? JSON.parse(row.vaccines) 
+        : row.vaccines;
       
-      // Se vaccines for um array, consideramos que são os nomes das vacinas disponíveis
+      // If vaccines is an array, consider them as names of available vaccines
       if (Array.isArray(vaccinesFromDb)) {
         vaccinesFromDb.forEach(vaccine => {
           if (vaccinesList.includes(vaccine)) {
@@ -35,7 +34,7 @@ const mapDbRowToUBS = (row: any): UBSItem => {
           }
         });
       } 
-      // Se for um objeto, assumimos que está no formato {nome: boolean}
+      // If it's an object, we assume it's in {name: boolean} format
       else if (typeof vaccinesFromDb === 'object') {
         Object.keys(vaccinesFromDb).forEach(key => {
           if (vaccinesList.includes(key)) {
@@ -44,7 +43,7 @@ const mapDbRowToUBS = (row: any): UBSItem => {
         });
       }
     } catch (e) {
-      console.error('Erro ao processar as vacinas:', e);
+      console.error('Error processing vaccines:', e);
     }
   }
 
@@ -61,31 +60,43 @@ const mapDbRowToUBS = (row: any): UBSItem => {
 
 export const getAllUBS = async (): Promise<UBSItem[]> => {
   try {
-    // Verifica se estamos no navegador
-    if (typeof window !== 'undefined' || !pool) {
-      console.log('Executando no navegador ou pool não disponível, usando dados mockados');
+    // Check if we're in browser environment
+    if (typeof window !== 'undefined') {
+      console.log('Running in browser, using mock data');
       const { mockUBSData } = await import('@/data/mockUBSData');
-      return mockUBSData as UBSItem[];
+      return mockUBSData;
     }
     
-    // Tentando obter dados da tabela ubs
+    // Try to import pool dynamically for server environment
+    if (!pool) {
+      try {
+        const module = await import('../db.js');
+        pool = module.default;
+      } catch (e) {
+        console.error('Failed to load database pool:', e);
+        // Fallback to mock data if pool can't be loaded
+        const { mockUBSData } = await import('@/data/mockUBSData');
+        return mockUBSData;
+      }
+    }
+    
+    // Try to get data from the ubs table
     const result = await pool.query('SELECT * FROM ubs');
     
-    // Se não houver erro e tiver dados, mapeia para o formato UBSItem
+    // If we have data, map it to UBSItem format
     if (result && result.rows) {
+      console.log(`Found ${result.rows.length} UBS records in database`);
       return result.rows.map(mapDbRowToUBS);
     }
     
-    throw new Error('Não foi possível recuperar os dados da UBS');
+    throw new Error('Could not retrieve UBS data');
   } catch (error) {
-    console.error('Erro ao buscar dados das UBS:', error);
+    console.error('Error fetching UBS data:', error);
     
-    // Em caso de erro (por exemplo, tabela não existe), use os dados mockados
-    console.warn('Usando dados mockados como fallback.');
-    
-    // Importamos os dados mockados diretamente aqui para não criar dependência circular
+    // Use mock data as fallback in case of error
+    console.warn('Using mock data as fallback.');
     const { mockUBSData } = await import('@/data/mockUBSData');
-    return mockUBSData as UBSItem[];
+    return mockUBSData;
   }
 };
 

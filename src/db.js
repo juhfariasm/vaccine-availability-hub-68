@@ -1,7 +1,8 @@
 
-const { Pool } = require('pg');
+import pkg from 'pg';
+const { Pool } = pkg;
 
-// Configurações do PostgreSQL usando Pool em vez de Client
+// PostgreSQL configuration using Pool instead of Client
 const pool = new Pool({
   user: 'infovacdb_idtw_user',
   host: 'dpg-cv0fht5umphs73eqfk6g-a.oregon-postgres.render.com',
@@ -9,9 +10,8 @@ const pool = new Pool({
   password: 'TR33ZGyimpS9UKIF6DtQijfBhD6YfNRN',
   port: 5432,
   ssl: {
-    rejectUnauthorized: false, // Permite conexões SSL sem verificar o certificado
+    rejectUnauthorized: false, // Allow SSL connections without certificate verification
   },
 });
 
-// Exporta o pool para ser usado em outros arquivos
-module.exports = pool;
+export default pool;

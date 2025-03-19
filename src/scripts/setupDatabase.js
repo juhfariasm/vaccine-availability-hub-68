@@ -1,21 +1,38 @@
 
-// Script para configurar o banco de dados inicial
-const pool = require('../db');
+import pg from 'pg';
+const { Pool } = pg;
+
+// PostgreSQL configuration
+const pool = new Pool({
+  user: 'infovacdb_idtw_user',
+  host: 'dpg-cv0fht5umphs73eqfk6g-a.oregon-postgres.render.com',
+  database: 'infovacdb_idtw',
+  password: 'TR33ZGyimpS9UKIF6DtQijfBhD6YfNRN',
+  port: 5432,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
 
 async function setupDatabase() {
   try {
-    console.log('Iniciando configuração do banco de dados...');
+    console.log('Starting database setup...');
     
-    // Verifica se a tabela ubs já existe
+    // Test connection
+    const connTest = await pool.query('SELECT NOW()');
+    console.log('Database connection established!');
+    console.log('Database current time:', connTest.rows[0].now);
+    
+    // Check if ubs table exists
     const tablesRes = await pool.query(`
       SELECT * FROM information_schema.tables 
       WHERE table_schema = 'public' AND table_name = 'ubs'
     `);
     
     if (tablesRes.rows.length === 0) {
-      console.log('Criando tabela UBS...');
+      console.log('Creating UBS table...');
       
-      // Cria a tabela ubs
+      // Create ubs table
       await pool.query(`
         CREATE TABLE ubs (
           id SERIAL PRIMARY KEY,
@@ -28,18 +45,18 @@ async function setupDatabase() {
         );
       `);
       
-      console.log('Tabela UBS criada com sucesso!');
+      console.log('UBS table created successfully!');
     } else {
-      console.log('Tabela UBS já existe. Pulando criação.');
+      console.log('UBS table already exists. Skipping creation.');
     }
     
-    // Verifica se já existem registros na tabela
+    // Check if there are already records in the table
     const countRes = await pool.query('SELECT COUNT(*) FROM ubs');
     
     if (parseInt(countRes.rows[0].count) === 0) {
-      console.log('Inserindo dados de exemplo na tabela UBS...');
+      console.log('Inserting sample data into UBS table...');
       
-      // Dados de exemplo para inserção
+      // Sample data for insertion
       const sampleData = [
         {
           name: 'UBS Vila Nova',
@@ -133,7 +150,7 @@ async function setupDatabase() {
         }
       ];
       
-      // Insere os dados na tabela
+      // Insert data into the table
       for (const ubs of sampleData) {
         await pool.query(
           `INSERT INTO ubs (name, address, distance, status, opening_hours, vaccines) 
@@ -149,19 +166,19 @@ async function setupDatabase() {
         );
       }
       
-      console.log('Dados de exemplo inseridos com sucesso!');
+      console.log('Sample data inserted successfully!');
     } else {
-      console.log(`Tabela UBS já contém ${countRes.rows[0].count} registros. Pulando inserção.`);
+      console.log(`UBS table already contains ${countRes.rows[0].count} records. Skipping insertion.`);
     }
     
-    console.log('Configuração do banco de dados concluída!');
+    console.log('Database setup completed!');
     
   } catch (err) {
-    console.error('Erro durante a configuração do banco de dados:', err);
+    console.error('Error during database setup:', err);
   } finally {
-    pool.end();
+    await pool.end();
   }
 }
 
-// Executa a configuração
+// Run the setup
 setupDatabase();
