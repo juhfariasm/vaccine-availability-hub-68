@@ -7,9 +7,9 @@ class UBS extends Model {
   public id!: number;
   public name!: string;
   public address!: string;
-  public distance!: number;
-  public status!: 'open' | 'closed';
+  public status!: string;
   public openingHours!: string;
+  public distance!: number;
   public city!: string;
   public latitude!: number;
   public longitude!: number;
@@ -33,22 +33,22 @@ UBS.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    distance: {
-      type: DataTypes.FLOAT,
-      defaultValue: 0,
-    },
     status: {
-      type: DataTypes.ENUM('open', 'closed'),
+      type: DataTypes.STRING,
+      allowNull: false,
       defaultValue: 'open',
     },
     openingHours: {
       type: DataTypes.STRING,
-      defaultValue: '08:00 - 18:00',
+      allowNull: false,
+    },
+    distance: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
     },
     city: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'Teresina',
     },
     latitude: {
       type: DataTypes.FLOAT,
