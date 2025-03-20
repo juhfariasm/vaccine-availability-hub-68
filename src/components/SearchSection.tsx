@@ -7,65 +7,23 @@ import UBSTableView from './ubs/UBSTableView';
 import EmptyResults from './ubs/EmptyResults';
 import { UBSItem } from '@/types/ubs';
 import { useToast } from '@/hooks/use-toast';
-import { useDatabase } from '@/hooks/use-database';
+import { mockUBSData } from '@/data/mockUBSData';
 
 const SearchSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVaccine, setFilterVaccine] = useState('all');
   const [filterCity, setFilterCity] = useState('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
-  const [searchResults, setSearchResults] = useState<UBSItem[]>([]);
+  const [searchResults, setSearchResults] = useState<UBSItem[]>(mockUBSData);
   const { toast } = useToast();
-  const { isConnected, isLoading, ubsList } = useDatabase();
   
-  // Converter dados do banco para o formato UBSItem
-  const convertToUBSItem = (dbData: any[]): UBSItem[] => {
-    try {
-      return dbData.map(ubs => {
-        // Mapear vacinas para o formato esperado
-        const vaccines: { [key: string]: boolean } = {};
-        
-        if (ubs.vaccines && Array.isArray(ubs.vaccines)) {
-          ubs.vaccines.forEach((vaccine: any) => {
-            vaccines[vaccine.name] = vaccine.UBSVaccine?.available || false;
-          });
-        }
-        
-        return {
-          id: ubs.id,
-          name: ubs.name,
-          address: ubs.address,
-          distance: 0, // Calcular distância se tivermos geolocalização
-          status: ubs.status === "Aberto" ? "open" : "closed",
-          openingHours: ubs.openingHours,
-          vaccines
-        };
-      });
-    } catch (error) {
-      console.error('Error converting UBS data:', error);
-      return [];
-    }
-  };
-  
-  // Efeito para processar os dados iniciais do banco
+  // Efeito para inicializar com dados mockados
   useEffect(() => {
-    if (!isLoading && ubsList.length > 0) {
-      const convertedData = convertToUBSItem(ubsList);
-      setSearchResults(convertedData);
-    }
-  }, [isLoading, ubsList]);
+    setSearchResults(mockUBSData);
+  }, []);
   
   const handleSearch = () => {
-    if (isLoading || ubsList.length === 0) {
-      toast({
-        title: "Dados não disponíveis",
-        description: "Aguarde o carregamento dos dados ou verifique a conexão com o banco.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    let results = convertToUBSItem(ubsList);
+    let results = [...mockUBSData];
     
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -122,27 +80,15 @@ const SearchSection = () => {
           </CardContent>
         </Card>
         
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando dados do banco...</p>
-          </div>
-        ) : !isConnected ? (
-          <div className="text-center py-12 bg-red-50 rounded-lg p-6">
-            <p className="text-red-600 font-medium mb-2">Não foi possível conectar ao banco de dados</p>
-            <p className="text-gray-600">Mostrando dados mockados para demonstração</p>
-          </div>
-        ) : (
-          <>
-            {viewMode === 'cards' ? (
-              <UBSCardView searchResults={searchResults} />
-            ) : (
-              <UBSTableView searchResults={searchResults} />
-            )}
-            
-            {searchResults.length === 0 && <EmptyResults />}
-          </>
-        )}
+        <>
+          {viewMode === 'cards' ? (
+            <UBSCardView searchResults={searchResults} />
+          ) : (
+            <UBSTableView searchResults={searchResults} />
+          )}
+          
+          {searchResults.length === 0 && <EmptyResults />}
+        </>
       </div>
     </section>
   );

@@ -1,50 +1,54 @@
 
 import { useState, useEffect } from 'react';
-import { initializeDatabase, getAllVaccines, getAllUBS, updateVaccineAvailability } from '../services/databaseService';
-import { UBSModel, VaccineModel } from '../types/ubs';
 import { useToast } from './use-toast';
+import { UBSModel, VaccineModel } from '../types/ubs';
+import { vaccinesList } from '../data/mockUBSData';
+
+// Mock data to use as fallback
+const mockVaccines: VaccineModel[] = vaccinesList.map((name, index) => ({
+  id: index + 1,
+  name
+}));
+
+// Empty list to start with - will be populated with API calls
+const initialUbsList: UBSModel[] = [];
 
 export const useDatabase = () => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [vaccines, setVaccines] = useState<VaccineModel[]>([]);
-  const [ubsList, setUbsList] = useState<UBSModel[]>([]);
+  const [vaccines, setVaccines] = useState<VaccineModel[]>(mockVaccines);
+  const [ubsList, setUbsList] = useState<UBSModel[]>(initialUbsList);
   const { toast } = useToast();
 
   useEffect(() => {
-    const connectToDatabase = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
-        // Inicializar a conexão com o banco de dados
-        const connected = await initializeDatabase();
-        setIsConnected(connected);
         
-        if (connected) {
-          // Buscar dados iniciais
-          const [vaccineData, ubsData] = await Promise.all([
-            getAllVaccines(),
-            getAllUBS()
-          ]);
-          
-          setVaccines(vaccineData);
-          setUbsList(ubsData);
-          
-          toast({
-            title: "Conectado ao banco de dados",
-            description: "Os dados foram carregados com sucesso.",
-          });
-        } else {
-          toast({
-            title: "Erro de conexão",
-            description: "Não foi possível conectar ao banco de dados.",
-            variant: "destructive"
-          });
-        }
+        // Instead of directly using Sequelize in the browser,
+        // we'll simulate an API call to fetch data
+        // In a real app, you'd make fetch calls to your backend API
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // For now, we're not connected to a real database
+        setIsConnected(false);
+        
+        // Use mock data since we're not connected
+        setVaccines(mockVaccines);
+        setUbsList(initialUbsList);
+        
+        toast({
+          title: "Modo demonstração",
+          description: "Usando dados demonstrativos no frontend.",
+          variant: "default"
+        });
       } catch (error) {
-        console.error('Database connection error:', error);
+        console.error('Database simulation error:', error);
         toast({
           title: "Erro de conexão",
-          description: "Ocorreu um erro ao conectar com o banco de dados.",
+          description: "Usando dados demonstrativos como fallback.",
           variant: "destructive"
         });
         setIsConnected(false);
@@ -53,51 +57,49 @@ export const useDatabase = () => {
       }
     };
 
-    connectToDatabase();
+    fetchData();
   }, [toast]);
 
-  // Função para atualizar a disponibilidade de uma vacina
+  // Função para atualizar a disponibilidade de uma vacina (simulada)
   const updateVaccineStatus = async (ubsId: number, vaccineId: number, available: boolean): Promise<boolean> => {
     try {
-      const success = await updateVaccineAvailability(ubsId, vaccineId, available);
-      
-      if (success) {
-        // Atualizar o estado local para refletir a mudança
-        setUbsList(prev => {
-          const updated = [...prev];
-          const ubsIndex = updated.findIndex(ubs => ubs.id === ubsId);
-          
-          if (ubsIndex !== -1 && updated[ubsIndex].vaccines) {
-            const vaccineIndex = updated[ubsIndex].vaccines.findIndex(v => v.id === vaccineId);
-            
-            if (vaccineIndex !== -1) {
-              // Aqui estamos garantindo que vaccines existe e atualizando o UBSVaccine
-              const updatedVaccines = [...updated[ubsIndex].vaccines];
-              updatedVaccines[vaccineIndex] = {
-                ...updatedVaccines[vaccineIndex],
-                UBSVaccine: {
-                  ...updatedVaccines[vaccineIndex].UBSVaccine,
-                  available
-                }
-              };
-              
-              updated[ubsIndex] = {
-                ...updated[ubsIndex],
-                vaccines: updatedVaccines
-              };
-            }
-          }
-          
-          return updated;
-        });
+      // Atualizar o estado local para refletir a mudança
+      setUbsList(prev => {
+        const updated = [...prev];
+        const ubsIndex = updated.findIndex(ubs => ubs.id === ubsId);
         
-        toast({
-          title: "Atualização concluída",
-          description: `Disponibilidade da vacina ${available ? 'ativada' : 'desativada'}.`,
-        });
-      }
+        if (ubsIndex !== -1 && updated[ubsIndex].vaccines) {
+          const vaccineIndex = updated[ubsIndex].vaccines.findIndex(v => v.id === vaccineId);
+          
+          if (vaccineIndex !== -1) {
+            // Aqui estamos garantindo que vaccines existe e atualizando o UBSVaccine
+            const updatedVaccines = [...updated[ubsIndex].vaccines];
+            updatedVaccines[vaccineIndex] = {
+              ...updatedVaccines[vaccineIndex],
+              UBSVaccine: {
+                id: 0,
+                ubsId,
+                vaccineId,
+                available
+              }
+            };
+            
+            updated[ubsIndex] = {
+              ...updated[ubsIndex],
+              vaccines: updatedVaccines
+            };
+          }
+        }
+        
+        return updated;
+      });
       
-      return success;
+      toast({
+        title: "Atualização simulada",
+        description: `Disponibilidade da vacina ${available ? 'ativada' : 'desativada'} (demonstração).`,
+      });
+      
+      return true;
     } catch (error) {
       console.error('Error updating vaccine status:', error);
       toast({
@@ -109,21 +111,17 @@ export const useDatabase = () => {
     }
   };
 
-  // Recarregar dados
+  // Recarregar dados (simulação)
   const refreshData = async () => {
     try {
       setIsLoading(true);
-      const [vaccineData, ubsData] = await Promise.all([
-        getAllVaccines(),
-        getAllUBS()
-      ]);
       
-      setVaccines(vaccineData);
-      setUbsList(ubsData);
+      // Simulação de recarregamento
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       toast({
         title: "Dados atualizados",
-        description: "Os dados foram recarregados com sucesso.",
+        description: "Os dados foram recarregados com sucesso (demonstração).",
       });
       
       return true;
