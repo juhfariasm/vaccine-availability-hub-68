@@ -4,52 +4,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Navigation, Clock, CheckCircle, AlertCircle } from 'lucide-react';
-
-// Mock data for nearby UBSs - reduced to 3 items
-const mockNearbyUBS = [
-  {
-    id: 1,
-    name: 'UBS Vila Nova',
-    distance: 1.2,
-    address: 'Rua das Flores, 123 - Vila Nova',
-    status: 'open',
-    openingHours: '07:00 - 19:00',
-    vaccines: [
-      { name: 'COVID-19', available: true },
-      { name: 'Gripe', available: true },
-      { name: 'Febre Amarela', available: false },
-      { name: 'Tétano', available: true },
-    ]
-  },
-  {
-    id: 2,
-    name: 'UBS Central',
-    distance: 1.8,
-    address: 'Av. Principal, 500 - Centro',
-    status: 'open',
-    openingHours: '08:00 - 18:00',
-    vaccines: [
-      { name: 'COVID-19', available: true },
-      { name: 'Gripe', available: false },
-      { name: 'Febre Amarela', available: true },
-      { name: 'Tétano', available: true },
-    ]
-  },
-  {
-    id: 3,
-    name: 'UBS Jardim América',
-    distance: 2.5,
-    address: 'Rua dos Ipês, 78 - Jardim América',
-    status: 'open',
-    openingHours: '07:00 - 17:00',
-    vaccines: [
-      { name: 'COVID-19', available: false },
-      { name: 'Gripe', available: true },
-      { name: 'Febre Amarela', available: true },
-      { name: 'Tétano', available: false },
-    ]
-  }
-];
+import { getNearbyUBS } from '@/services/ubsService';
+import { toast } from '@/components/ui/use-toast';
 
 const NearbyUBS = () => {
   const [nearbyUBS, setNearbyUBS] = useState<any[]>([]);
@@ -57,14 +13,25 @@ const NearbyUBS = () => {
   const [locationError, setLocationError] = useState(false);
 
   useEffect(() => {
-    // Simulating API fetch with a delay
-    const timer = setTimeout(() => {
-      setNearbyUBS(mockNearbyUBS);
-      setLoading(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
+    loadNearbyUBS();
   }, []);
+
+  const loadNearbyUBS = async () => {
+    setLoading(true);
+    try {
+      const data = await getNearbyUBS(3);
+      setNearbyUBS(data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Erro ao carregar UBSs próximas:', error);
+      setLoading(false);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar as UBSs próximas.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const handleGetLocation = () => {
     setLoading(true);
@@ -73,20 +40,28 @@ const NearbyUBS = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         () => {
-          // In a real app, we would use position to get nearby UBSs
-          setTimeout(() => {
-            setNearbyUBS(mockNearbyUBS);
-            setLoading(false);
-          }, 1000);
+          // Na vida real, usaríamos as coordenadas para buscar as UBSs próximas
+          // Por enquanto, apenas recarregamos os dados
+          loadNearbyUBS();
         },
         () => {
           setLocationError(true);
           setLoading(false);
+          toast({
+            title: 'Erro de localização',
+            description: 'Não foi possível obter sua localização atual.',
+            variant: 'destructive',
+          });
         }
       );
     } else {
       setLocationError(true);
       setLoading(false);
+      toast({
+        title: 'Navegador incompatível',
+        description: 'Seu navegador não suporta geolocalização.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -170,7 +145,7 @@ const NearbyUBS = () => {
                   <div className="flex-1 flex flex-col">
                     <p className="text-sm font-medium mb-2">Vacinas disponíveis:</p>
                     <div className="grid grid-cols-2 gap-2">
-                      {ubs.vaccines.map((vaccine) => (
+                      {ubs.vaccines.map((vaccine: { name: string, available: boolean }) => (
                         <div 
                           key={vaccine.name} 
                           className={`text-xs rounded-full px-3 py-1.5 flex items-center justify-center font-medium ${

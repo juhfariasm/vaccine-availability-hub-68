@@ -1,47 +1,62 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SearchFilters, ViewToggle } from './ubs/SearchFilters';
 import UBSCardView from './ubs/UBSCardView';
 import UBSTableView from './ubs/UBSTableView';
 import EmptyResults from './ubs/EmptyResults';
-import { mockUBSData } from '@/data/mockUBSData';
 import { UBSItem } from '@/types/ubs';
+import { filterUBS, getAvailableCities } from '@/services/ubsService';
+import { vaccinesList } from '@/data/mockUBSData';
+import { toast } from '@/components/ui/use-toast';
 
 const SearchSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVaccine, setFilterVaccine] = useState('all');
   const [filterCity, setFilterCity] = useState('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [searchResults, setSearchResults] = useState<UBSItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [cities, setCities] = useState<string[]>([]);
   
-  // Convert mockUBSData status strings to the expected "open" | "closed" type
-  const typedMockUBSData: UBSItem[] = mockUBSData.map(ubs => ({
-    ...ubs,
-    status: ubs.status === "Aberto" ? "open" : "closed"
-  }));
+  useEffect(() => {
+    // Carrega as cidades disponíveis
+    const loadCities = async () => {
+      try {
+        const availableCities = await getAvailableCities();
+        setCities(availableCities);
+      } catch (error) {
+        console.error('Erro ao carregar cidades:', error);
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível carregar a lista de cidades.',
+          variant: 'destructive',
+        });
+      }
+    };
+    
+    loadCities();
+    
+    // Realiza a busca inicial
+    handleSearch();
+  }, []);
   
-  const [searchResults, setSearchResults] = useState<UBSItem[]>(typedMockUBSData);
-  
-  const handleSearch = () => {
-    let results = typedMockUBSData;
-    
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      results = results.filter(ubs => 
-        ubs.name.toLowerCase().includes(query) || 
-        ubs.address.toLowerCase().includes(query)
-      );
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      const results = await filterUBS(searchQuery, filterVaccine, filterCity);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Erro ao buscar UBSs:', error);
+      toast({
+        title: 'Erro na busca',
+        description: 'Ocorreu um erro ao buscar as UBSs. Tente novamente.',
+        variant: 'destructive',
+      });
+      setSearchResults([]);
+    } finally {
+      setLoading(false);
     }
-    
-    if (filterVaccine !== 'all') {
-      results = results.filter(ubs => ubs.vaccines[filterVaccine as keyof typeof ubs.vaccines]);
-    }
-    
-    if (filterCity !== 'all') {
-      results = results.filter(ubs => ubs.address.includes(filterCity));
-    }
-    
-    setSearchResults(results);
   };
 
   return (
@@ -70,6 +85,8 @@ const SearchSection = () => {
               filterCity={filterCity}
               setFilterCity={setFilterCity}
               handleSearch={handleSearch}
+              vaccineOptions={vaccinesList}
+              cityOptions={cities}
             />
             
             <ViewToggle
@@ -80,13 +97,40 @@ const SearchSection = () => {
           </CardContent>
         </Card>
         
-        {viewMode === 'cards' ? (
-          <UBSCardView searchResults={searchResults} />
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="glass-card animate-pulse h-[420px]">
+                <div className="h-full flex flex-col justify-between p-6">
+                  <div className="space-y-3">
+                    <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-full mt-6"></div>
+                  </div>
+                  <div className="space-y-3 mt-6">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="h-8 bg-gray-200 rounded"></div>
+                      <div className="h-8 bg-gray-200 rounded"></div>
+                      <div className="h-8 bg-gray-200 rounded"></div>
+                      <div className="h-8 bg-gray-200 rounded"></div>
+                    </div>
+                    <div className="h-10 bg-gray-200 rounded w-full mt-4"></div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
         ) : (
-          <UBSTableView searchResults={searchResults} />
+          <>
+            {viewMode === 'cards' ? (
+              <UBSCardView searchResults={searchResults} />
+            ) : (
+              <UBSTableView searchResults={searchResults} />
+            )}
+            
+            {searchResults.length === 0 && <EmptyResults />}
+          </>
         )}
-        
-        {searchResults.length === 0 && <EmptyResults />}
       </div>
     </section>
   );
