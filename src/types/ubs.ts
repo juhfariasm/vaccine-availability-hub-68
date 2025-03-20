@@ -8,7 +8,7 @@ export interface UBSItem {
   openingHours: string;
   vaccines: {
     [key: string]: boolean;
-  } | Array<{ name: string; available: boolean }>;
+  };
 }
 
 export interface SearchFiltersProps {
@@ -19,8 +19,6 @@ export interface SearchFiltersProps {
   filterCity: string;
   setFilterCity: (value: string) => void;
   handleSearch: () => void;
-  vaccineOptions?: string[];
-  cityOptions?: string[];
 }
 
 export interface ViewToggleProps {
