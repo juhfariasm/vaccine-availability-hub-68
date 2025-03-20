@@ -113,7 +113,7 @@ export const getAllUBS = async (): Promise<UBSItem[]> => {
       include: [
         {
           model: Vaccine,
-          as: 'Vaccines', // Use the association name
+          as: 'Vaccines',
           through: { attributes: ['available'] },
         },
       ],
@@ -181,7 +181,7 @@ export const filterUBS = async (
     query.include = [
       {
         model: Vaccine,
-        as: 'Vaccines', // Use the association name
+        as: 'Vaccines',
         through: { attributes: ['available'] },
       },
     ];
@@ -239,7 +239,7 @@ export const getNearbyUBS = async (limit = 3): Promise<UBSItem[]> => {
       include: [
         {
           model: Vaccine,
-          as: 'Vaccines', // Use the association name
+          as: 'Vaccines',
           through: { attributes: ['available'] },
         },
       ],
