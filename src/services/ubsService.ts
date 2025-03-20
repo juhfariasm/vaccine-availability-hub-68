@@ -1,8 +1,8 @@
+
 import { UBS, Vaccine, UBSVaccine } from '../db/models';
 import sequelize from '../db/config';
 import { UBSItem } from '@/types/ubs';
 import { vaccinesList } from '@/data/mockUBSData';
-import { Op } from 'sequelize'; // Import Op directly
 
 // Função para inicializar dados no banco se necessário
 export const initializeData = async () => {
@@ -101,11 +101,6 @@ export const initializeData = async () => {
   }
 };
 
-// Helper function to ensure status is 'open' or 'closed'
-const normalizeStatus = (status: string): 'open' | 'closed' => {
-  return status === 'open' ? 'open' : 'closed';
-};
-
 // Função para buscar todas as UBSs com suas vacinas
 export const getAllUBS = async (): Promise<UBSItem[]> => {
   try {
@@ -113,7 +108,6 @@ export const getAllUBS = async (): Promise<UBSItem[]> => {
       include: [
         {
           model: Vaccine,
-          as: 'Vaccines',
           through: { attributes: ['available'] },
         },
       ],
@@ -141,7 +135,7 @@ export const getAllUBS = async (): Promise<UBSItem[]> => {
         name: ubs.name,
         address: ubs.address,
         distance: ubs.distance,
-        status: normalizeStatus(ubs.status), // Normalize status
+        status: ubs.status,
         openingHours: ubs.openingHours,
         vaccines,
       };
@@ -169,9 +163,9 @@ export const filterUBS = async (
     
     // Filtro por nome ou endereço
     if (searchQuery) {
-      whereClause[Op.or] = [
-        { name: { [Op.iLike]: `%${searchQuery}%` } },
-        { address: { [Op.iLike]: `%${searchQuery}%` } },
+      whereClause[sequelize.Op.or] = [
+        { name: { [sequelize.Op.iLike]: `%${searchQuery}%` } },
+        { address: { [sequelize.Op.iLike]: `%${searchQuery}%` } },
       ];
     }
     
@@ -181,7 +175,6 @@ export const filterUBS = async (
     query.include = [
       {
         model: Vaccine,
-        as: 'Vaccines',
         through: { attributes: ['available'] },
       },
     ];
@@ -211,7 +204,7 @@ export const filterUBS = async (
         name: ubs.name,
         address: ubs.address,
         distance: ubs.distance,
-        status: normalizeStatus(ubs.status), // Normalize status
+        status: ubs.status,
         openingHours: ubs.openingHours,
         vaccines,
       };
@@ -239,7 +232,6 @@ export const getNearbyUBS = async (limit = 3): Promise<UBSItem[]> => {
       include: [
         {
           model: Vaccine,
-          as: 'Vaccines',
           through: { attributes: ['available'] },
         },
       ],
@@ -249,7 +241,7 @@ export const getNearbyUBS = async (limit = 3): Promise<UBSItem[]> => {
 
     // Transforma os dados para o formato esperado pela aplicação
     return ubsList.map(ubs => {
-      const ubsVaccines = ubs.Vaccines || [];
+      const ubsVaccines: any[] = ubs.Vaccines || [];
       
       // Formata os dados de vacinas para o componente
       const formattedVaccines = ubsVaccines.slice(0, 4).map((vaccine: any) => ({
@@ -262,7 +254,7 @@ export const getNearbyUBS = async (limit = 3): Promise<UBSItem[]> => {
         name: ubs.name,
         address: ubs.address,
         distance: ubs.distance,
-        status: normalizeStatus(ubs.status), // Normalize status
+        status: ubs.status,
         openingHours: ubs.openingHours,
         vaccines: formattedVaccines,
       };

@@ -1,21 +1,17 @@
 
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config';
-import Vaccine from './Vaccine';
 
 class UBS extends Model {
   public id!: number;
   public name!: string;
   public address!: string;
-  public status!: 'open' | 'closed' | string;
-  public openingHours!: string;
   public distance!: number;
+  public status!: 'open' | 'closed';
+  public openingHours!: string;
   public city!: string;
   public latitude!: number;
   public longitude!: number;
-  
-  // Add declaration for the association
-  public Vaccines?: Vaccine[];
 }
 
 UBS.init(
@@ -33,22 +29,22 @@ UBS.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    distance: {
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
+    },
     status: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.ENUM('open', 'closed'),
       defaultValue: 'open',
     },
     openingHours: {
       type: DataTypes.STRING,
-      allowNull: false,
-    },
-    distance: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
+      defaultValue: '08:00 - 18:00',
     },
     city: {
       type: DataTypes.STRING,
       allowNull: false,
+      defaultValue: 'Teresina',
     },
     latitude: {
       type: DataTypes.FLOAT,

@@ -1,14 +1,10 @@
 
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config';
-import UBS from './UBS';
 
 class Vaccine extends Model {
   public id!: number;
   public name!: string;
-  
-  // Add declaration for the association
-  public UBS?: UBS[];
 }
 
 Vaccine.init(

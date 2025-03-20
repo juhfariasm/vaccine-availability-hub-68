@@ -47,19 +47,17 @@ UBSVaccine.init(
   }
 );
 
-// Defining the associations
+// Definindo as associações
 UBS.belongsToMany(Vaccine, {
   through: UBSVaccine,
   foreignKey: 'ubsId',
   otherKey: 'vaccineId',
-  as: 'Vaccines'  // Important: This defines the name of the association
 });
 
 Vaccine.belongsToMany(UBS, {
   through: UBSVaccine,
   foreignKey: 'vaccineId',
   otherKey: 'ubsId',
-  as: 'UBS'  // Name of the association on Vaccine model
 });
 
 export default UBSVaccine;
