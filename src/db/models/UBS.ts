@@ -7,7 +7,7 @@ class UBS extends Model {
   public id!: number;
   public name!: string;
   public address!: string;
-  public status!: string;
+  public status!: 'open' | 'closed' | string;
   public openingHours!: string;
   public distance!: number;
   public city!: string;

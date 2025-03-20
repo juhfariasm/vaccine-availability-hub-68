@@ -4,7 +4,7 @@ export interface UBSItem {
   name: string;
   address: string;
   distance: number;
-  status: 'open' | 'closed';
+  status: 'open' | 'closed' | string; // Updated to accept string
   openingHours: string;
   vaccines: {
     [key: string]: boolean;

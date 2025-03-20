@@ -1,4 +1,3 @@
-
 import { UBS, Vaccine, UBSVaccine } from '../db/models';
 import sequelize from '../db/config';
 import { UBSItem } from '@/types/ubs';
@@ -102,6 +101,11 @@ export const initializeData = async () => {
   }
 };
 
+// Helper function to ensure status is 'open' or 'closed'
+const normalizeStatus = (status: string): 'open' | 'closed' => {
+  return status === 'open' ? 'open' : 'closed';
+};
+
 // Função para buscar todas as UBSs com suas vacinas
 export const getAllUBS = async (): Promise<UBSItem[]> => {
   try {
@@ -137,7 +141,7 @@ export const getAllUBS = async (): Promise<UBSItem[]> => {
         name: ubs.name,
         address: ubs.address,
         distance: ubs.distance,
-        status: ubs.status,
+        status: normalizeStatus(ubs.status), // Normalize status
         openingHours: ubs.openingHours,
         vaccines,
       };
@@ -207,7 +211,7 @@ export const filterUBS = async (
         name: ubs.name,
         address: ubs.address,
         distance: ubs.distance,
-        status: ubs.status,
+        status: normalizeStatus(ubs.status), // Normalize status
         openingHours: ubs.openingHours,
         vaccines,
       };
@@ -258,7 +262,7 @@ export const getNearbyUBS = async (limit = 3): Promise<UBSItem[]> => {
         name: ubs.name,
         address: ubs.address,
         distance: ubs.distance,
-        status: ubs.status,
+        status: normalizeStatus(ubs.status), // Normalize status
         openingHours: ubs.openingHours,
         vaccines: formattedVaccines,
       };
