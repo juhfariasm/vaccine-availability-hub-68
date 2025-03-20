@@ -3,6 +3,7 @@ import { UBS, Vaccine, UBSVaccine } from '../db/models';
 import sequelize from '../db/config';
 import { UBSItem } from '@/types/ubs';
 import { vaccinesList } from '@/data/mockUBSData';
+import { Op } from 'sequelize'; // Import Op directly
 
 // Função para inicializar dados no banco se necessário
 export const initializeData = async () => {
@@ -108,6 +109,7 @@ export const getAllUBS = async (): Promise<UBSItem[]> => {
       include: [
         {
           model: Vaccine,
+          as: 'Vaccines', // Use the association name
           through: { attributes: ['available'] },
         },
       ],
@@ -163,9 +165,9 @@ export const filterUBS = async (
     
     // Filtro por nome ou endereço
     if (searchQuery) {
-      whereClause[sequelize.Op.or] = [
-        { name: { [sequelize.Op.iLike]: `%${searchQuery}%` } },
-        { address: { [sequelize.Op.iLike]: `%${searchQuery}%` } },
+      whereClause[Op.or] = [
+        { name: { [Op.iLike]: `%${searchQuery}%` } },
+        { address: { [Op.iLike]: `%${searchQuery}%` } },
       ];
     }
     
@@ -175,6 +177,7 @@ export const filterUBS = async (
     query.include = [
       {
         model: Vaccine,
+        as: 'Vaccines', // Use the association name
         through: { attributes: ['available'] },
       },
     ];
@@ -232,6 +235,7 @@ export const getNearbyUBS = async (limit = 3): Promise<UBSItem[]> => {
       include: [
         {
           model: Vaccine,
+          as: 'Vaccines', // Use the association name
           through: { attributes: ['available'] },
         },
       ],
@@ -241,7 +245,7 @@ export const getNearbyUBS = async (limit = 3): Promise<UBSItem[]> => {
 
     // Transforma os dados para o formato esperado pela aplicação
     return ubsList.map(ubs => {
-      const ubsVaccines: any[] = ubs.Vaccines || [];
+      const ubsVaccines = ubs.Vaccines || [];
       
       // Formata os dados de vacinas para o componente
       const formattedVaccines = ubsVaccines.slice(0, 4).map((vaccine: any) => ({
