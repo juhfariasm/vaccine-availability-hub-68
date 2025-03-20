@@ -1,127 +1,70 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Navigation, Clock, CheckCircle, AlertCircle } from 'lucide-react';
-import { useDatabase } from '@/hooks/use-database';
-import { useToast } from '@/hooks/use-toast';
 
-const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
-};
+// Mock data for nearby UBSs - reduced to 3 items
+const mockNearbyUBS = [
+  {
+    id: 1,
+    name: 'UBS Vila Nova',
+    distance: 1.2,
+    address: 'Rua das Flores, 123 - Vila Nova',
+    status: 'open',
+    openingHours: '07:00 - 19:00',
+    vaccines: [
+      { name: 'COVID-19', available: true },
+      { name: 'Gripe', available: true },
+      { name: 'Febre Amarela', available: false },
+      { name: 'Tétano', available: true },
+    ]
+  },
+  {
+    id: 2,
+    name: 'UBS Central',
+    distance: 1.8,
+    address: 'Av. Principal, 500 - Centro',
+    status: 'open',
+    openingHours: '08:00 - 18:00',
+    vaccines: [
+      { name: 'COVID-19', available: true },
+      { name: 'Gripe', available: false },
+      { name: 'Febre Amarela', available: true },
+      { name: 'Tétano', available: true },
+    ]
+  },
+  {
+    id: 3,
+    name: 'UBS Jardim América',
+    distance: 2.5,
+    address: 'Rua dos Ipês, 78 - Jardim América',
+    status: 'open',
+    openingHours: '07:00 - 17:00',
+    vaccines: [
+      { name: 'COVID-19', available: false },
+      { name: 'Gripe', available: true },
+      { name: 'Febre Amarela', available: true },
+      { name: 'Tétano', available: false },
+    ]
+  }
+];
 
 const NearbyUBS = () => {
-  const [userLat, setUserLat] = useState<number | null>(null);
-  const [userLng, setUserLng] = useState<number | null>(null);
   const [nearbyUBS, setNearbyUBS] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [locationError, setLocationError] = useState(false);
-  const { isConnected, isLoading, ubsList, vaccines } = useDatabase();
-  const { toast } = useToast();
-
-  const extractAvailableVaccines = (ubs: any) => {
-    if (!ubs.vaccines || !Array.isArray(ubs.vaccines)) return [];
-    
-    return ubs.vaccines.map((vaccine: any) => ({
-      name: vaccine.name,
-      available: vaccine.UBSVaccine?.available || false
-    }));
-  };
-
-  const findNearbyUBS = (latitude: number, longitude: number) => {
-    if (isLoading || ubsList.length === 0) {
-      return [];
-    }
-    
-    const ubsWithDistance = ubsList.map(ubs => {
-      const distance = calculateDistance(
-        latitude, 
-        longitude, 
-        ubs.latitude, 
-        ubs.longitude
-      );
-      
-      return {
-        ...ubs,
-        distance: parseFloat(distance.toFixed(2)),
-        vaccines: extractAvailableVaccines(ubs)
-      };
-    });
-    
-    return ubsWithDistance
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 3);
-  };
 
   useEffect(() => {
-    handleGetLocation();
-  }, []);
-
-  useEffect(() => {
-    if (!isLoading && userLat !== null && userLng !== null) {
-      const nearby = findNearbyUBS(userLat, userLng);
-      setNearbyUBS(nearby);
+    // Simulating API fetch with a delay
+    const timer = setTimeout(() => {
+      setNearbyUBS(mockNearbyUBS);
       setLoading(false);
-    } else if (!isLoading && !isConnected) {
-      const timer = setTimeout(() => {
-        setNearbyUBS([
-          {
-            id: 1,
-            name: 'UBS Vila Nova',
-            distance: 1.2,
-            address: 'Rua das Flores, 123 - Vila Nova',
-            status: 'open',
-            openingHours: '07:00 - 19:00',
-            vaccines: [
-              { name: 'COVID-19', available: true },
-              { name: 'Gripe', available: true },
-              { name: 'Febre Amarela', available: false },
-              { name: 'Tétano', available: true },
-            ]
-          },
-          {
-            id: 2,
-            name: 'UBS Central',
-            distance: 1.8,
-            address: 'Av. Principal, 500 - Centro',
-            status: 'open',
-            openingHours: '08:00 - 18:00',
-            vaccines: [
-              { name: 'COVID-19', available: true },
-              { name: 'Gripe', available: false },
-              { name: 'Febre Amarela', available: true },
-              { name: 'Tétano', available: true },
-            ]
-          },
-          {
-            id: 3,
-            name: 'UBS Jardim América',
-            distance: 2.5,
-            address: 'Rua dos Ipês, 78 - Jardim América',
-            status: 'open',
-            openingHours: '07:00 - 17:00',
-            vaccines: [
-              { name: 'COVID-19', available: false },
-              { name: 'Gripe', available: true },
-              { name: 'Febre Amarela', available: true },
-              { name: 'Tétano', available: false },
-            ]
-          }
-        ]);
-        setLoading(false);
-      }, 1500);
+    }, 1500);
 
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading, userLat, userLng, ubsList, isConnected]);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleGetLocation = () => {
     setLoading(true);
@@ -129,33 +72,21 @@ const NearbyUBS = () => {
     
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLat(latitude);
-          setUserLng(longitude);
-          
-          // O useEffect vai pegar isso e chamar findNearbyUBS
+        () => {
+          // In a real app, we would use position to get nearby UBSs
+          setTimeout(() => {
+            setNearbyUBS(mockNearbyUBS);
+            setLoading(false);
+          }, 1000);
         },
-        (error) => {
-          console.error('Error getting location:', error);
+        () => {
           setLocationError(true);
           setLoading(false);
-          toast({
-            title: "Erro de localização",
-            description: "Não foi possível obter sua localização.",
-            variant: "destructive"
-          });
-        },
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        }
       );
     } else {
       setLocationError(true);
       setLoading(false);
-      toast({
-        title: "Geolocalização não suportada",
-        description: "Seu navegador não suporta geolocalização.",
-        variant: "destructive"
-      });
     }
   };
 
@@ -228,7 +159,7 @@ const NearbyUBS = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="text-sm text-gray-600 flex-1 flex flex-col">
-                  <div className="mb-3 h-12">
+                  <div className="mb-3 h-12"> {/* Fixed height container for address */}
                     <p className="mb-1">{ubs.address}</p>
                     <div className="flex items-center text-gray-500">
                       <Clock className="h-3.5 w-3.5 mr-1" />
@@ -239,7 +170,7 @@ const NearbyUBS = () => {
                   <div className="flex-1 flex flex-col">
                     <p className="text-sm font-medium mb-2">Vacinas disponíveis:</p>
                     <div className="grid grid-cols-2 gap-2">
-                      {ubs.vaccines.map((vaccine: any) => (
+                      {ubs.vaccines.map((vaccine) => (
                         <div 
                           key={vaccine.name} 
                           className={`text-xs rounded-full px-3 py-1.5 flex items-center justify-center font-medium ${
@@ -260,15 +191,7 @@ const NearbyUBS = () => {
                   </div>
                 </CardContent>
                 <CardFooter className="mt-auto">
-                  <Button 
-                    variant="outline" 
-                    className="w-full gap-2 bg-white"
-                    onClick={() => {
-                      if (userLat && userLng) {
-                        window.open(`https://www.google.com/maps/dir/${userLat},${userLng}/${ubs.latitude},${ubs.longitude}`);
-                      }
-                    }}
-                  >
+                  <Button variant="outline" className="w-full gap-2 bg-white">
                     <Navigation className="h-4 w-4" />
                     Ver no mapa
                   </Button>

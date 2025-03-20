@@ -1,29 +1,29 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SearchFilters, ViewToggle } from './ubs/SearchFilters';
 import UBSCardView from './ubs/UBSCardView';
 import UBSTableView from './ubs/UBSTableView';
 import EmptyResults from './ubs/EmptyResults';
-import { UBSItem } from '@/types/ubs';
-import { useToast } from '@/hooks/use-toast';
 import { mockUBSData } from '@/data/mockUBSData';
+import { UBSItem } from '@/types/ubs';
 
 const SearchSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVaccine, setFilterVaccine] = useState('all');
   const [filterCity, setFilterCity] = useState('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
-  const [searchResults, setSearchResults] = useState<UBSItem[]>(mockUBSData);
-  const { toast } = useToast();
   
-  // Efeito para inicializar com dados mockados
-  useEffect(() => {
-    setSearchResults(mockUBSData);
-  }, []);
+  // Convert mockUBSData status strings to the expected "open" | "closed" type
+  const typedMockUBSData: UBSItem[] = mockUBSData.map(ubs => ({
+    ...ubs,
+    status: ubs.status === "Aberto" ? "open" : "closed"
+  }));
+  
+  const [searchResults, setSearchResults] = useState<UBSItem[]>(typedMockUBSData);
   
   const handleSearch = () => {
-    let results = [...mockUBSData];
+    let results = typedMockUBSData;
     
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -34,7 +34,7 @@ const SearchSection = () => {
     }
     
     if (filterVaccine !== 'all') {
-      results = results.filter(ubs => ubs.vaccines[filterVaccine]);
+      results = results.filter(ubs => ubs.vaccines[filterVaccine as keyof typeof ubs.vaccines]);
     }
     
     if (filterCity !== 'all') {
@@ -80,15 +80,13 @@ const SearchSection = () => {
           </CardContent>
         </Card>
         
-        <>
-          {viewMode === 'cards' ? (
-            <UBSCardView searchResults={searchResults} />
-          ) : (
-            <UBSTableView searchResults={searchResults} />
-          )}
-          
-          {searchResults.length === 0 && <EmptyResults />}
-        </>
+        {viewMode === 'cards' ? (
+          <UBSCardView searchResults={searchResults} />
+        ) : (
+          <UBSTableView searchResults={searchResults} />
+        )}
+        
+        {searchResults.length === 0 && <EmptyResults />}
       </div>
     </section>
   );
