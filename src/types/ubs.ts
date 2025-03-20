@@ -4,7 +4,7 @@ export interface UBSItem {
   name: string;
   address: string;
   distance: number;
-  status: 'open' | 'closed';
+  status: 'open' | 'closed' | string;
   openingHours: string;
   vaccines: {
     [key: string]: boolean;
@@ -30,4 +30,27 @@ export interface ViewToggleProps {
 export interface ResultsProps {
   searchResults: UBSItem[];
   filterVaccine: string;
+}
+
+// Database model interfaces
+export interface UBSModel {
+  id: number;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  status: string;
+  openingHours: string;
+}
+
+export interface VaccineModel {
+  id: number;
+  name: string;
+}
+
+export interface UBSVaccineModel {
+  id: number;
+  ubsId: number;
+  vaccineId: number;
+  available: boolean;
 }
