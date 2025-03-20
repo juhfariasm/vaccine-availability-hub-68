@@ -67,13 +67,23 @@ export const useDatabase = () => {
           const updated = [...prev];
           const ubsIndex = updated.findIndex(ubs => ubs.id === ubsId);
           
-          if (ubsIndex !== -1) {
-            const vaccineIndex = updated[ubsIndex].vaccines?.findIndex(v => v.id === vaccineId);
+          if (ubsIndex !== -1 && updated[ubsIndex].vaccines) {
+            const vaccineIndex = updated[ubsIndex].vaccines.findIndex(v => v.id === vaccineId);
             
-            if (vaccineIndex !== -1 && updated[ubsIndex].vaccines) {
-              updated[ubsIndex].vaccines[vaccineIndex].UBSVaccine = {
-                ...updated[ubsIndex].vaccines[vaccineIndex].UBSVaccine!,
-                available
+            if (vaccineIndex !== -1) {
+              // Aqui estamos garantindo que vaccines existe e atualizando o UBSVaccine
+              const updatedVaccines = [...updated[ubsIndex].vaccines];
+              updatedVaccines[vaccineIndex] = {
+                ...updatedVaccines[vaccineIndex],
+                UBSVaccine: {
+                  ...updatedVaccines[vaccineIndex].UBSVaccine,
+                  available
+                }
+              };
+              
+              updated[ubsIndex] = {
+                ...updated[ubsIndex],
+                vaccines: updatedVaccines
               };
             }
           }

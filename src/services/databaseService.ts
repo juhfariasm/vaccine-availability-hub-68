@@ -31,7 +31,11 @@ export const initializeDatabase = async () => {
 // Função para buscar todas as vacinas
 export const getAllVaccines = async (): Promise<VaccineModel[]> => {
   try {
-    return await Vaccine.findAll();
+    const vaccines = await Vaccine.findAll();
+    return vaccines.map(vaccine => ({
+      id: vaccine.id,
+      name: vaccine.name
+    }));
   } catch (error) {
     console.error('Error fetching vaccines:', error);
     return [];
@@ -41,7 +45,7 @@ export const getAllVaccines = async (): Promise<VaccineModel[]> => {
 // Função para buscar todas as UBS
 export const getAllUBS = async (): Promise<UBSModel[]> => {
   try {
-    return await UBS.findAll({
+    const ubsList = await UBS.findAll({
       include: [{
         model: Vaccine,
         as: 'vaccines',
@@ -49,6 +53,15 @@ export const getAllUBS = async (): Promise<UBSModel[]> => {
           attributes: ['available']
         }
       }]
+    });
+    
+    // Converter para o formato UBSModel
+    return ubsList.map(ubs => {
+      const ubsData = ubs.get({ plain: true });
+      return {
+        ...ubsData,
+        vaccines: ubsData.vaccines || [] // Garantir que vaccines é um array, mesmo que vazio
+      } as UBSModel;
     });
   } catch (error) {
     console.error('Error fetching UBS:', error);

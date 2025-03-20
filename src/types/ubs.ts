@@ -41,11 +41,13 @@ export interface UBSModel {
   longitude: number;
   status: string;
   openingHours: string;
+  vaccines: VaccineModel[]; // Making this non-optional
 }
 
 export interface VaccineModel {
   id: number;
   name: string;
+  UBSVaccine?: UBSVaccineModel;
 }
 
 export interface UBSVaccineModel {
